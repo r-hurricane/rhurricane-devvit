@@ -15,6 +15,8 @@ import {SummaryApi} from "./SummaryApi.js";
 import {TwoPage} from "./two/TwoPage.js";
 import {AtcfPage} from "./atcf/AtcfPage.js";
 import {TcpodPage} from "./tcpod/TcpodPage.js";
+import {RedisService} from "../../devvit/redis/RedisService.js";
+import {LoadingOrError} from "../LoadingOrError.js";
 
 export interface SummaryWidgetProps {
     context: Context;
@@ -27,6 +29,7 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
         async () => {
             // TODO: Read from REDIS instead
             // TODO: Do not provide data if the over 24 hours old! Maybe make this a new setting as well?
+            const redis = new RedisService(props.context.redis);
             return (await fetch('https://dev.rhurricane.net/api/v1/')).json();
         },
         {
@@ -40,39 +43,34 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
     const twoData: SummaryApi | null = loaded ? data : null;
 
     return (
-        <vstack padding="small" width="100%" grow>
-            <hstack gap="small">
-                <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.two?.count ?? 0} title="TWO" />
-                <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.atcf?.count ?? 0} title="ATCF" />
-                <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.tcpod?.count ?? 0} title="TCPOD" />
-            </hstack>
-            {!loaded && (
-                <vstack grow>
-                    <spacer size="medium" />
-                    <vstack
-                        grow
-                        padding="small"
-                        border="thin"
-                        alignment="center middle"
-                        cornerRadius="medium"
-                        lightBackgroundColor="PureGray-100"
-                        darkBackgroundColor="PureGray-800"
-                        lightBorderColor="PureGray-300"
-                        darkBorderColor="PureGray-600"
-                    >
-                        <text weight="bold" size="large">
-                            {
-                                !loading && error
-                                ? 'An error has occurred. Please try again later.'
-                                : 'Loading Tropical Weather Outlook...'
-                            }
-                        </text>
-                    </vstack>
+        <zstack width="100%" height="100%">
+            <vstack padding="small" width="100%" height="100%" grow>
+                <hstack gap="small">
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.two?.count} title="TWO" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.atcf?.count} title="ATCF" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.tcpod?.count} title="TCPOD" />
+                </hstack>
+                {!loaded && <LoadingOrError message='Loading Tropical Weather Outlook...' />}
+                {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={twoData?.two?.data} />}
+                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} atcf={twoData?.atcf?.data} />}
+                {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} tcpod={twoData?.tcpod?.data} />}
+            </vstack>
+            {activePage === 'DIS' && (
+                <vstack width="100%" height="100%" padding="medium" alignment="top start" gap="medium" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+                    <text style="heading" size="xxlarge">Data Disclaimer</text>
+                    <text size="xlarge" weight="bold" wrap>This app is is NOT an official government app and therefore should not be used for any decisions pertaining to your safety or security!</text>
+                    <text wrap size="large">Please visit the Official National Hurricane Center (NHC) (https://nhc.noaa.gov) or the Official Joint Typhoon Warning Center (JTWC) (https://www.metoc.navy.mil/ jtwc/jtwc.html) pages for official government warnings and data.</text>
+                    <text wrap>Data obtained from the National Hurricane Center (NHC) and National Weather Service (NWS)</text>
+                    <hstack width="100%" alignment="bottom center">
+                        <button width="100%" onPress={() => {setActivePage('TWO')}}>Acknowledged</button>
+                    </hstack>
                 </vstack>
             )}
-            {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={twoData?.two?.data} />}
-            {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} atcf={twoData?.atcf?.data} />}
-            {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} tcpod={twoData?.tcpod?.data} />}
-        </vstack>
+            <vstack width="100%" height="100%" alignment="bottom start">
+                <hstack width="100%" border="thin" alignment="top center" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+                    <text size="small" weight="bold" onPress={() => {setActivePage('DIS')}}>&gt; &gt; &gt; Click to review Data Disclaimer! &lt; &lt; &lt;</text>
+                </hstack>
+            </vstack>
+        </zstack>
     );
 };

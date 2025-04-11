@@ -7,6 +7,8 @@
 
 import {Devvit} from "@devvit/public-api";
 import {DataUpdater} from "../jobs/DataUpdater.js";
+import {RedisService} from "../redis/RedisService.js";
+import {PostType} from "../../../shared/dtos/redis/IPostMetadataDto.js";
 
 export class CreateSummaryPostMenuItem {
 
@@ -34,7 +36,8 @@ export class CreateSummaryPostMenuItem {
                         return;
                     }
 
-                    // TODO: Check job has run ar least once (i.e. Check redis for the data)
+                    // TODO: Check redis to ensure data exists and is not stale/old (i.e. last modified < 24 hours)
+                    const redis = new RedisService(context.redis);
 
                     // Submit the new post
                     const post = await context.reddit.submitPost({
@@ -44,15 +47,15 @@ export class CreateSummaryPostMenuItem {
                             text: 'Interactive posts are unsupported on old.reddit or older app versions.'
                         },
                         preview: (
-                            <zstack width='100%' height='100%' alignment="center middle">
-                                <vstack width='100%' height='100%' alignment="center middle">
+                            <zstack width="100%" height="100%" alignment="center middle">
+                                <vstack width="100%" height="100%" alignment="center middle">
                                     <image
                                         url="loading.gif"
                                         description="Loading ..."
-                                        height='170px'
-                                        width='170px'
-                                        imageHeight='170px'
-                                        imageWidth='170px'
+                                        height="170px"
+                                        width="170px"
+                                        imageHeight="170px"
+                                        imageWidth="170px"
                                     />
                                     <spacer size="small" />
                                     <text size="large" weight="bold">
@@ -63,7 +66,8 @@ export class CreateSummaryPostMenuItem {
                         )
                     });
 
-                    // TODO: Save post type to redis
+                    // Save post type to redis
+                    await redis.savePostMetadata(post.id, { type: PostType.Summary });
 
                 } catch (ex) {
                     console.error('[Menu - Create Summary] Error creating the summary post:', ex);

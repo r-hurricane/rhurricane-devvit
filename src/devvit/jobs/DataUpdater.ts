@@ -20,10 +20,12 @@ import {AppSettings} from '../AppSettings.js';
 
 export class DataUpdater extends JobBase {
 
-    private static _Instance: DataUpdater | null = null;
+    static #Instance: DataUpdater | null = null;
 
     public static get Instance() {
-        return DataUpdater._Instance;
+        if (!DataUpdater.#Instance)
+            DataUpdater.#Instance = new DataUpdater();
+        return DataUpdater.#Instance;
     }
 
     private static readonly JOB_NAME = 'data-update';
@@ -31,7 +33,6 @@ export class DataUpdater extends JobBase {
 
     public constructor() {
         super(DataUpdater.JOB_NAME, DataUpdater.REDIS_KEY);
-        DataUpdater._Instance = this;
     }
 
     public override async cronExpression(context: JobContext): Promise<string> {

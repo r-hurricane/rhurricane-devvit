@@ -26,8 +26,24 @@ const chanceColorScheme = (chance: number) => {
             chance > 0 ? 'Yellow' : 'PureGray';
 };
 
+const chanceImage = (chance: number) => {
+    const name = chance > 60
+        ? 'high'
+        : chance >= 40
+            ? 'medium'
+            : 'low';
+    return <image
+        url={`${name}-chance.png`}
+        description={`${name} chance`}
+        width="20px"
+        height="20px"
+        imageWidth="20px"
+        imageHeight="20px" />;
+};
+
 const AreaOfInterest = (props: TwoStormProps) => {
-    const colorScheme = chanceColorScheme(Math.max(props.storm.twoDay?.chance ?? 0, props.storm.sevenDay?.chance ?? 0));
+    const maxChance = Math.max(props.storm.twoDay?.chance ?? 0, props.storm.sevenDay?.chance ?? 0);
+    const colorScheme = chanceColorScheme(maxChance);
     return (
         <vstack>
             <spacer size="xsmall" />
@@ -35,12 +51,13 @@ const AreaOfInterest = (props: TwoStormProps) => {
                 padding="small"
                 border="thin"
                 cornerRadius="small"
-                lightBackgroundColor={colorScheme+'-100'}
-                darkBackgroundColor={colorScheme+'-800'}
+                lightBackgroundColor={colorScheme+'-50'}
+                darkBackgroundColor={colorScheme+'-900'}
                 lightBorderColor={colorScheme+'-300'}
                 darkBorderColor={colorScheme+'-600'}
                 gap="small"
             >
+                {chanceImage(maxChance)}
                 <text width="35px" alignment="middle center">{props.storm.twoDay?.chance ?? 0}%</text>
                 <text>|</text>
                 <text width="35px" alignment="middle center">{props.storm.sevenDay?.chance ?? 0}%</text>

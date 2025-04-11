@@ -10,6 +10,7 @@ import {AppSettings} from "./devvit/AppSettings.js";
 import {JobController} from "./devvit/jobs/JobController.js";
 import {AppUpgradeTrigger} from "./devvit/triggers/AppUpgradeTrigger.js";
 import {MenuRegistrar} from "./devvit/menu-items/MenuRegistrar.js";
+import {registerCustomPostType} from "./blocks/CustomPostType.js";
 
 Devvit.configure({
   http: true,
@@ -18,8 +19,9 @@ Devvit.configure({
 });
 
 AppSettings.RegisterSettings();
-JobController.Init();
+JobController.RegisterJobs();
 AppUpgradeTrigger.RegisterTrigger();
 MenuRegistrar.RegisterMenus();
+registerCustomPostType();
 
 export default Devvit;

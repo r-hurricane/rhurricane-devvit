@@ -11,13 +11,13 @@ export interface MenuItemProps {
     activePage: string;
     setActivePage: (page: string) => void;
     title: string;
-    count: number;
+    count: number | undefined;
     disabled: boolean;
 }
 
 export const MenuItem = (props: MenuItemProps) => {
     const isActive = !props.disabled && props.activePage === props.title;
-    const hasCount = !props.disabled && props.count > 0;
+    const hasCount = !props.disabled && !!props.count && props.count > 0;
     return (
         <hstack
             padding="small"
@@ -40,7 +40,7 @@ export const MenuItem = (props: MenuItemProps) => {
                 {props.title}
             </text>
             <spacer size="xsmall"/>
-            <text size="small">({props.count ?? 0})</text>
+            <text size="small">({hasCount ? props.count ?? 0 : '--'})</text>
         </hstack>
     );
 };
