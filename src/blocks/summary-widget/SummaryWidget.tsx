@@ -11,12 +11,13 @@
 
 import {Context, Devvit, useState, useAsync} from "@devvit/public-api";
 import {MenuItem} from './MenuItem.js';
-import {SummaryApi} from "./SummaryApi.js";
 import {TwoPage} from "./two/TwoPage.js";
 import {AtcfPage} from "./atcf/AtcfPage.js";
 import {TcpodPage} from "./tcpod/TcpodPage.js";
 import {RedisService} from "../../devvit/redis/RedisService.js";
 import {LoadingOrError} from "../LoadingOrError.js";
+import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
+import {AppSettings} from "../../devvit/AppSettings.js";
 
 export interface SummaryWidgetProps {
     context: Context;
@@ -27,20 +28,38 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
 
     const {data, loading, error} = useAsync(
         async () => {
-            // TODO: Read from REDIS instead
             // TODO: Do not provide data if the over 24 hours old! Maybe make this a new setting as well?
+            // Create Redis service
             const redis = new RedisService(props.context.redis);
-            return (await fetch('https://dev.rhurricane.net/api/v1/')).json();
+
+            // Get API last modified
+            const lastMod = await redis.getSummaryApiLastModified();
+            if (!lastMod)
+                throw new Error('Failed to load LastModified from Redis.');
+
+            // Fail if not a valid date string
+            const date = new Date(lastMod);
+            if (!date || isNaN(date.getTime()))
+                throw new Error(`LastModified date of ${lastMod} was invalid`);
+
+            // Check last modified is < {setting} hours ago
+            const staleSetting = await AppSettings.GetStaleHours(props.context.settings);
+            const saleTime = new Date().getTime() - staleSetting * 3600000;
+            if (date.getTime() < saleTime)
+                throw new Error(`API Data is stale, last modified at ${lastMod} which is over ${staleSetting} hours ago!`);
+
+            // Finally, fetch the actual data!
+            return await redis.getSummaryApiData();
         },
         {
             finally: (_, error) => {
                 if (error)
-                    console.error(error);
+                    console.error('[SummaryLoad] ' + error);
             }
         }
     );
     const loaded = !loading && !error;
-    const twoData: SummaryApi | null = loaded ? data : null;
+    const twoData: SummaryApiDto | null = loaded ? data : null;
 
     return (
         <zstack width="100%" height="100%">

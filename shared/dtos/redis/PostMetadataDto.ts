@@ -5,11 +5,9 @@
  * License: BSD-3-Clause
  */
 
-import {BaseRedisDto} from "./BaseRedisDto.js";
-
 export type PostType = 'summary' | 'storm' | 'recon';
 
-export type PostMetadataDto = BaseRedisDto & {
+export type PostMetadataDto = {
     type: PostType;
 }
 

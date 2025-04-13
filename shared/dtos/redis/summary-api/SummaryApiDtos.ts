@@ -1,0 +1,32 @@
+﻿/*!
+ * Represents the base container of the summary API data. The specific data points (TWO, ATCF, TCPOD) are separated.
+ *
+ * THE DEBATE - Zod + z.infer<> vs. Interfaces
+ * ==========
+ * The summary API is complex, and has multiple structures to support the different breadths of data. I could simply
+ * plop the API result into Redis, extract and "cast" with "as". However, if the API data changes unexpectedly, the
+ * post would be the one that fails to render.
+ *
+ * With Zod, I am able to ensure the schema matches in the update job and report it, rather than potentially causing the
+ * post to not render. However, it requires a lot of initial setup, potentially duplicated code, and requires a future
+ * web-view to require zod, since the shared DTO would require it for the type defs! This could be a performance issue.
+ *
+ * Author: u/Beach-Brews
+ * License: BSD-3-Clause
+ */
+
+import {TwoData} from "./SummaryApiTwoDtos.js";
+import {AtcfData} from "./SummaryApiAtcfDtos.js";
+import {TcpodData} from "./SummaryApiTcpodDtos.js";
+
+export type SummaryApiData<TData> = {
+    data: TData;
+    lastModified: number;
+    count: number;
+}
+
+export type SummaryApiDto = {
+    two: SummaryApiData<TwoData>;
+    atcf: SummaryApiData<AtcfData[]>;
+    tcpod: SummaryApiData<TcpodData>;
+}

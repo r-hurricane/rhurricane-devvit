@@ -18,7 +18,13 @@ enum SettingKeys {
     RHurricaneEnvironment = 'rhurricane-environment',
 
     // How frequently (in minutes) to call the summary API to check for updates. Default: 1 minute
-    SummaryUpdateFrequency = 'summary-update-freq'
+    SummaryUpdateFrequency = 'summary-update-freq',
+
+    // How many hours before considering summary data to be stale
+    SummaryStaleHours = 'summary-stale-hours',
+
+    // Webhook URL to send notifications to
+    DiscordNotificationUrl = 'discord-noti-url'
 }
 
 export class AppSettings {
@@ -31,6 +37,14 @@ export class AppSettings {
 
     public static async GetUpdateFrequency(settings: SettingsClient): Promise<number> {
         return await settings.get<number>(SettingKeys.SummaryUpdateFrequency) ?? 1;
+    }
+
+    public static async GetStaleHours(settings: SettingsClient): Promise<number> {
+        return await settings.get<number>(SettingKeys.SummaryStaleHours) ?? 12;
+    }
+
+    public static async GetDiscordNotificationUrl(settings: SettingsClient): Promise<string | undefined> {
+        return await settings.get<string>(SettingKeys.DiscordNotificationUrl);
     }
 
     public static RegisterSettings(): void {
@@ -65,6 +79,32 @@ export class AppSettings {
                         return 'Frequency must be at least 1';
                     if (event.value! > 60)
                         return 'Frequency must be 60 or less';
+                }
+            },
+            {
+                type: 'number',
+                name: SettingKeys.SummaryStaleHours,
+                label: 'Data API Stale Time (hr)',
+                helpText: 'When to consider the summary API data to be outdated and not displayed.',
+                defaultValue: 12,
+                scope: SettingScope.Installation,
+                onValidate: event => {
+                    if (event.value! < 1)
+                        return 'Value must be at least 1';
+                }
+            },
+            {
+                type: 'string',
+                name: SettingKeys.DiscordNotificationUrl,
+                label: 'Discord Notification URL',
+                helpText: 'A Discord channel webhook URL to send alerts to.',
+                scope: SettingScope.Installation,
+                onValidate: event => {
+                    if (event.value && event.value.length > 0 &&
+                        !event.value.startsWith('https://discord.com/api/webhooks')
+                    ) {
+                        return `Value must be a valid discord webhook URL.`
+                    }
                 }
             }
         ]);
