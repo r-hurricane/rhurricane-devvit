@@ -7,6 +7,7 @@
 
 import {Devvit} from "@devvit/public-api";
 import {DataUpdater} from "../jobs/DataUpdater.js";
+import {Logger} from "../Logger.js";
 
 export class StartDataUpdaterMenuItem {
 
@@ -15,6 +16,10 @@ export class StartDataUpdaterMenuItem {
             label: 'RHurricane - Start Data Updater',
             location: 'subreddit',
             onPress: async (_, context) => {
+
+                // Create logger
+                const logger = await Logger.Create('Menu - Start Update', context.settings);
+
                 try {
                     const job = DataUpdater.Instance;
                     if (!job) {
@@ -22,7 +27,7 @@ export class StartDataUpdaterMenuItem {
                             text: 'ERROR: Unable to locate Data Updater job instance.',
                             appearance: 'neutral'
                         });
-                        console.error('[Menu - Start] Unable to locate DataUpdater instance.');
+                        logger.error('Unable to locate DataUpdater instance.');
                         return;
                     }
 
@@ -32,10 +37,10 @@ export class StartDataUpdaterMenuItem {
                         text: 'Data Updater Started',
                         appearance: 'success'
                     })
-                    console.log('[Menu - Start] Successfully started DataUpdater job.');
+                    logger.info('Successfully started DataUpdater job.');
 
                 } catch (ex) {
-                    console.error('[Menu - Start] Error scheduling update job:', ex);
+                    logger.error('Error scheduling update job:', ex);
                     context.ui.showToast({
                         text: 'ERROR: There was an error starting the data updater.',
                         appearance: 'neutral'

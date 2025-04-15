@@ -7,6 +7,7 @@
 
 import {Devvit} from "@devvit/public-api";
 import {DataUpdater} from "../jobs/DataUpdater.js";
+import {Logger} from "../Logger.js";
 
 export class StopDataUpdaterMenuItem {
 
@@ -15,6 +16,10 @@ export class StopDataUpdaterMenuItem {
             label: 'RHurricane - Stop Data Updater',
             location: 'subreddit',
             onPress: async (_, context) => {
+
+                // Create logger
+                const logger = await Logger.Create('Menu - Stop Update', context.settings);
+                
                 try {
                     const job = DataUpdater.Instance;
                     if (!job) {
@@ -22,7 +27,7 @@ export class StopDataUpdaterMenuItem {
                             text: 'ERROR: Unable to locate Data Updater job instance.',
                             appearance: 'neutral'
                         });
-                        console.error('[Menu - Stop] Unable to locate DataUpdater instance.');
+                        logger.error('Unable to locate DataUpdater instance.');
                         return;
                     }
 
@@ -32,10 +37,10 @@ export class StopDataUpdaterMenuItem {
                         text: 'Data Updater Stopped',
                         appearance: 'success'
                     })
-                    console.log('[Menu - Stop] Successfully stopped DataUpdater job.');
+                    logger.info('Successfully stopped DataUpdater job.');
 
                 } catch (ex) {
-                    console.error('[Menu - Stop] Error canceling update job:', ex);
+                    logger.error('Error stopping update job:', ex);
                     context.ui.showToast({
                         text: 'ERROR: There was an error stopping the data updater.',
                         appearance: 'neutral'

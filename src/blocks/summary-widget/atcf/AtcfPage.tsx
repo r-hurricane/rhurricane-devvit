@@ -6,7 +6,7 @@
  */
 
 import {Context, Devvit} from "@devvit/public-api";
-import {AtcfData} from "../SummaryApi.js";
+import {AtcfData} from "../../../../shared/dtos/redis/summary-api/SummaryApiAtcfDtos.js";
 
 interface AtcfPageProps {
     context: Context;
@@ -76,6 +76,7 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
                 darkBorderColor={colorScheme+'-600'}
             >
                 <text style="heading">{name}</text>
+                {pRow(c.date, 'Updated', getDate(c.date))}
                 {pRow(c.lon, 'Pos', `${c.lat?.toFixed(1) ?? 0} ${c.lon?.toFixed(1) ?? 0}`)}
                 {pRow(c.maxSusWind, 'Wind', `${c.maxSusWind}kt${p(' / ', c.windGust, 'kt')}${p(' @ ', c.maxWindRad, 'nmi')}`)}
                 {pRow(c.minSeaLevelPsur, 'Psur', `${c.minSeaLevelPsur}mb${p(' - ', c.outerPsur, 'mb')}${p(' @ ', c.outerRad, 'nmi')}`)}
@@ -83,12 +84,11 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
                 {pRow(c.windRad?.rad, 'Wind Radi', `${c.windRad?.rad}NM`)}
                 {c.windRad?.rad ? (
                     <vstack>
-                        <text>{c.windRad.nw?.toString().padStart(3, ' ') ?? '  0'}kt ------ ${c.windRad.ne?.toString().padStart(3, ' ') ?? '  0'}kt</text>
-                        <text>{c.eyeDia?.toString().padStart(10, '&nbsp;') ?? '  0'}NM</text>
-                        <text>{c.windRad.sw?.toString().padStart(3, ' ') ?? '  0'}kt ------ ${c.windRad.se?.toString().padStart(3, ' ') ?? '  0'}kt</text>
+                        <text>{c.windRad.nw?.toString().padStart(3, ' ') ?? '  0'}kt ------ {c.windRad.ne?.toString().padStart(3, ' ') ?? '  0'}kt</text>
+                        <text>{c.eyeDia?.toString().padStart(12, '\xa0') ?? '  0'}NM</text>
+                        <text>{c.windRad.sw?.toString().padStart(3, ' ') ?? '  0'}kt ------ {c.windRad.se?.toString().padStart(3, ' ') ?? '  0'}kt</text>
                     </vstack>
                 ) : null}
-                {pRow(c.date, 'Date Time', getDate(c.date))}
             </vstack>
         </vstack>
     );

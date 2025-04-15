@@ -6,7 +6,7 @@
  */
 
 import {Devvit, Context} from "@devvit/public-api";
-import {INous42Basin, INous42Mission, TcpodData} from "../SummaryApi.js";
+import {Nous42Basin, Nous42Mission, TcpodData} from "../../../../shared/dtos/redis/summary-api/SummaryApiTcpodDtos.js";
 
 export interface TcpodPageProps {
     context: Context;
@@ -67,14 +67,14 @@ export const TcpodPage = (props: TcpodPageProps) => {
     }
 
     const getBasinSummary =
-        (today: INous42Basin | null | undefined, tomorrow: INous42Basin | null | undefined) => {
+        (today: Nous42Basin | null | undefined, tomorrow: Nous42Basin | null | undefined) => {
             const storms = (today?.storms || [])
                 .concat(tomorrow?.storms || [])
                 .reduce((a, v) => {
                     if (v.name != null)
                         a[v.name] = a[v.name] ? a[v.name].concat(v.missions) : v.missions;
                     return a;
-                }, {} as {[key: string]: INous42Mission[]});
+                }, {} as {[key: string]: Nous42Mission[]});
 
             if (Object.keys(storms).length <= 0 && (!tomorrow || tomorrow.outlook.every(o => o.negative)))
                 return (<NoMissions />);

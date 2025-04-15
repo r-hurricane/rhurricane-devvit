@@ -96,8 +96,30 @@ export const Nous42Schema = z
 	})
 	.strict();
 
+export const WmoHeaderSegmentSchema = z
+    .object({
+        major: z.string().nullable(),
+        minor: z.string().nullable(),
+        last: z.boolean()
+    })
+    .strict();
+
+export const WmoHeaderSchema = z
+    .object({
+        sequence: z.number().nullable(),
+        designator: z.string().nullable(),
+        station: z.string().nullable(),
+        datetime: WmoDateSchema.nullable(),
+        delay: z.string().nullable(),
+        correction: z.string().nullable(),
+        amendment: z.string().nullable(),
+        segment: WmoHeaderSegmentSchema.nullable()
+    })
+    .strict();
+
 export const TcpodWmoSchema = z
 	.object({
+        header: WmoHeaderSchema,
         message: Nous42Schema
 	})
 	.strict();

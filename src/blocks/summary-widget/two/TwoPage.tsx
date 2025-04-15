@@ -6,7 +6,7 @@
  */
 
 import {Devvit, Context} from "@devvit/public-api";
-import {IAbxx20AreaOfInterest, TwoData} from "../SummaryApi.js";
+import {TwoAreaOfInterest, TwoData} from "../../../../shared/dtos/redis/summary-api/SummaryApiTwoDtos.js";
 import SizeString = Devvit.Blocks.SizeString;
 
 export interface TwoPageProps {
@@ -17,7 +17,7 @@ export interface TwoPageProps {
 
 interface TwoStormProps {
     widgetWidth: number;
-    storm: IAbxx20AreaOfInterest;
+    storm: TwoAreaOfInterest;
 }
 
 const chanceColorScheme = (chance: number) => {
@@ -62,7 +62,10 @@ const AreaOfInterest = (props: TwoStormProps) => {
                 <text>|</text>
                 <text width="35px" alignment="middle center">{props.storm.sevenDay?.chance ?? 0}%</text>
                 <text>|</text>
-                <text width={(props.widgetWidth-135)+'px' as SizeString} overflow="ellipsis">{props.storm.id} - {props.storm.title}</text>
+                <text width={(props.widgetWidth-135)+'px' as SizeString} overflow="ellipsis">
+                    {!!props.storm.id && props.storm.id.length > 0 ? props.storm.id + ' - ' : ''}
+                    {props.storm.title}
+                </text>
             </hstack>
         </vstack>
     );
@@ -89,6 +92,13 @@ const NoActivityExpected = () => {
         </vstack>
     );
 };
+
+const renderDate = (time: number | undefined | null): string => {
+    if (!time) return 'Unknown';
+    const date = new Date(time);
+    if (!date || isNaN(date.getTime())) return 'Unknown';
+    return `${date.getUTCFullYear()}-${(date.getUTCMonth()+1).toString().padStart(2, '0')}-${date.getUTCDate().toString().padStart(2, '0')} ${date.getUTCHours().toString().padStart(2, '0')}z`;
+}
 
 export const TwoPage = (props: TwoPageProps) => {
     // Get dimensions from context
@@ -142,8 +152,8 @@ export const TwoPage = (props: TwoPageProps) => {
             <vstack
                 padding="small"
                 border="thin"
-                lightBackgroundColor={titleColor+'-100'}
-                darkBackgroundColor={titleColor+'-800'}
+                lightBackgroundColor={titleColor+'-50'}
+                darkBackgroundColor={titleColor+'-900'}
                 lightBorderColor={titleColor+'-300'}
                 darkBorderColor={titleColor+'-600'}
                 alignment="center middle"
@@ -152,10 +162,8 @@ export const TwoPage = (props: TwoPageProps) => {
                 <text
                     weight="bold"
                     size="large"
-                    lightColor={titleColor+'-600'}
-                    darkColor={titleColor+'-100'}
                 >
-                    {widgetWidth < 500 ? 'TWO' : 'Tropical Weather Outlook (TWO)'} - {two.atlantic.issuedOn?.iso ?? ''}
+                    {widgetWidth < 500 ? 'TWO' : 'Tropical Weather Outlook (TWO)'} - {renderDate(two.atlantic.issuedOn?.time) ?? ''}
                 </text>
                 <text size="xsmall">Open Details</text>
             </vstack>

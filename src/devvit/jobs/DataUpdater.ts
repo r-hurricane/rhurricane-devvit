@@ -19,6 +19,7 @@ import {JobBase} from "./JobBase.js";
 import {AppSettings, SettingsEnvironment} from '../AppSettings.js';
 import {Notifier} from "../notifications/Notifier.js";
 import {RedisService} from "../redis/RedisService.js";
+import {Logger} from "../Logger.js";
 
 export class DataUpdater extends JobBase {
 
@@ -43,6 +44,10 @@ export class DataUpdater extends JobBase {
     }
 
     public override async onRun(_: ScheduledJobEvent<JSONObject | undefined>, context: JobContext): Promise<void> {
+
+        // Create log helper
+        const logger = await Logger.Create('Data Updater', context.settings);
+
         let notifier: Notifier | undefined;
 
         try {
@@ -51,7 +56,7 @@ export class DataUpdater extends JobBase {
 
             // Get the environment setting to know whether to use the dev domain or not
             const environment = await AppSettings.GetEnvironment(context.settings);
-            const summaryApiUrl = `https://${environment === SettingsEnvironment.Development ? 'dev.' : ''}rhurricane.net/api/v1/`;
+            const summaryApiUrl = `https://${environment === SettingsEnvironment.Development ? 'dev.' : ''}rhurricane.net/api/v1/?full=1`;
 
             // Get the last modified date from Redis
             const redis = new RedisService(context.redis);
@@ -66,13 +71,13 @@ export class DataUpdater extends JobBase {
 
             // If response was 304, the data has not been modified since last check.
             if (apiResult.status === 304) {
-                console.log('[Data Updater] API returned 304 status (no updates).');
+                logger.info('API returned 304 status (no updates).');
 
                 // Check last modified is < {setting} hours ago
                 const staleSetting = await AppSettings.GetStaleHours(context.settings);
                 const saleTime = new Date().getTime() - staleSetting * 3600000;
                 if (lastModified && new Date(lastModified).getTime() < saleTime) {
-                    console.warn(`[Data Updater] Stale data detected! Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
+                    logger.warn(`Stale data detected! Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
                     await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - Stale Data Detected\n\nThe data updater has detected the Summary API has become stale. Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
                 }
                 return;
@@ -80,8 +85,8 @@ export class DataUpdater extends JobBase {
 
             // If not a 200 status
             if (apiResult.status !== 200) {
-               const message = `[Data Updater] Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!\n\n${await apiResult.text()}`;
-                console.error(message);
+               const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!\n\n${await apiResult.text()}`;
+                logger.error(message);
                 await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - API Call Failed\n\n${message}`);
                 return;
             }
@@ -93,25 +98,25 @@ export class DataUpdater extends JobBase {
             const apiLastModified = apiResult.headers.get('Last-Modified');
             if (apiLastModified) {
                 await redis.setSummaryApiLastModified(apiLastModified);
-                console.log(`[Data Updater] Saved last modified date ${apiLastModified} from API!`);
+                logger.info(`Saved last modified date ${apiLastModified} from API!`);
 
             } else {
-                console.warn('[Data Updater] API did not return a last modified date!');
+                logger.warn(`API did not return a last modified date!`);
             }
 
         } catch (e) {
-            console.error('[Data Updater] Error during update process:', e);
+            logger.error('Error during update process :', e);
 
             try {
                 if (!notifier || !notifier.enabled) {
-                    console.warn('[Data Updater] No Notifier was created, so no notification was sent.');
+                    logger.warn('No Notifier was created, so no notification was sent.');
                     return;
                 }
 
                 await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - General Failure\n\nAn error was encountered while processing data updates:\n\`\`\`\n${e}\n\`\`\``);
 
             } catch (e2) {
-                console.error('[Data Updater] Error while trying to send notification! ', e2);
+                logger.error('Error while trying to send notification! ', e2);
             }
         }
     }

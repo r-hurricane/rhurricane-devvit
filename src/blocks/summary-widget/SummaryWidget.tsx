@@ -28,7 +28,6 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
 
     const {data, loading, error} = useAsync(
         async () => {
-            // TODO: Do not provide data if the over 24 hours old! Maybe make this a new setting as well?
             // Create Redis service
             const redis = new RedisService(props.context.redis);
 
@@ -40,13 +39,13 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
             // Fail if not a valid date string
             const date = new Date(lastMod);
             if (!date || isNaN(date.getTime()))
-                throw new Error(`LastModified date of ${lastMod} was invalid`);
+                throw new Error(`[Summary Post] LastModified date of ${lastMod} was invalid`);
 
             // Check last modified is < {setting} hours ago
             const staleSetting = await AppSettings.GetStaleHours(props.context.settings);
             const saleTime = new Date().getTime() - staleSetting * 3600000;
             if (date.getTime() < saleTime)
-                throw new Error(`API Data is stale, last modified at ${lastMod} which is over ${staleSetting} hours ago!`);
+                throw new Error(`[Summary Post] API Data is stale, last modified at ${lastMod} which is over ${staleSetting} hours ago!`);
 
             // Finally, fetch the actual data!
             return await redis.getSummaryApiData();
@@ -54,7 +53,7 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
         {
             finally: (_, error) => {
                 if (error)
-                    console.error('[SummaryLoad] ' + error);
+                    console.error('[Summary Load] ' + error);
             }
         }
     );
@@ -63,7 +62,7 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
 
     return (
         <zstack width="100%" height="100%">
-            <vstack padding="small" width="100%" height="100%" grow>
+            <vstack padding="small" width="100%" height="100%" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
                 <hstack gap="small">
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.two?.count} title="TWO" />
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.atcf?.count} title="ATCF" />
@@ -74,10 +73,22 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                 {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} atcf={twoData?.atcf?.data} />}
                 {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} tcpod={twoData?.tcpod?.data} />}
             </vstack>
+            <vstack width="100%" height="100%" alignment="bottom start">
+                <hstack
+                    width="100%"
+                    border="thin"
+                    alignment="top center"
+                    lightBackgroundColor="Global-White"
+                    darkBackgroundColor="Global-Black"
+                    onPress={() => {setActivePage('DIS')}}
+                >
+                    <text size="medium" weight="bold">&gt; &gt; &gt; Click to review Data Disclaimer! &lt; &lt; &lt;</text>
+                </hstack>
+            </vstack>
             {activePage === 'DIS' && (
                 <vstack width="100%" height="100%" padding="medium" alignment="top start" gap="medium" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
                     <text style="heading" size="xxlarge">Data Disclaimer</text>
-                    <text size="xlarge" weight="bold" wrap>This app is is NOT an official government app and therefore should not be used for any decisions pertaining to your safety or security!</text>
+                    <text size="xlarge" weight="bold" color="danger-plain" wrap>This app is is NOT an official government app and therefore should not be used for any decisions pertaining to your safety or security!</text>
                     <text wrap size="large">Please visit the Official National Hurricane Center (NHC) (https://nhc.noaa.gov) or the Official Joint Typhoon Warning Center (JTWC) (https://www.metoc.navy.mil/ jtwc/jtwc.html) pages for official government warnings and data.</text>
                     <text wrap>Data obtained from the National Hurricane Center (NHC) and National Weather Service (NWS)</text>
                     <hstack width="100%" alignment="bottom center">
@@ -85,11 +96,6 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                     </hstack>
                 </vstack>
             )}
-            <vstack width="100%" height="100%" alignment="bottom start">
-                <hstack width="100%" border="thin" alignment="top center" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
-                    <text size="small" weight="bold" onPress={() => {setActivePage('DIS')}}>&gt; &gt; &gt; Click to review Data Disclaimer! &lt; &lt; &lt;</text>
-                </hstack>
-            </vstack>
         </zstack>
     );
 };

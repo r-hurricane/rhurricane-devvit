@@ -13,7 +13,7 @@ export const ShapeCoordinatesSchema = z.tuple([z.number(), z.number()]);
 export const ShapeGeometrySchema = z
     .object({
         type: z.string(),
-        bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).nullable(),
+        bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).nullable().optional(),
         coordinates: z.union([
             ShapeCoordinatesSchema,
             z.array(ShapeCoordinatesSchema),

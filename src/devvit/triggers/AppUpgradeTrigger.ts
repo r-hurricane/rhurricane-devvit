@@ -7,6 +7,7 @@
 
 import {Devvit} from "@devvit/public-api";
 import {JobController} from "../jobs/JobController.js";
+import {Logger} from "../Logger.js";
 
 export class AppUpgradeTrigger {
 
@@ -14,6 +15,10 @@ export class AppUpgradeTrigger {
         Devvit.addTrigger({
             event: 'AppUpgrade',
             onEvent: async (_, context) => {
+
+                // Create logger
+                const logger = await Logger.Create('App Update', context.settings);
+
                 try {
 
                     for (let j of JobController.Instance.jobList) {
@@ -21,7 +26,7 @@ export class AppUpgradeTrigger {
                     }
 
                 } catch(ex) {
-                    console.error('[AppUpgrade] Error while executing app upgrade trigger', ex);
+                    logger.error('Error while executing app upgrade trigger', ex);
                 }
             }
         });

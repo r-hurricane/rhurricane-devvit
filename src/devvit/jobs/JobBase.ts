@@ -13,6 +13,7 @@ import {
     ScheduledJob,
     ScheduledJobEvent, Scheduler, TriggerContext
 } from "@devvit/public-api";
+import {Logger} from "../Logger.js";
 
 export abstract class JobBase {
 
@@ -35,7 +36,8 @@ export abstract class JobBase {
                 try {
                     await this.onRun(event, context);
                 } catch (ex) {
-                    console.error(`Unhandled error running job ${this.jobName}`, ex);
+                    const logger = await Logger.Create('Job Base', context.settings);
+                    logger.error(`Unhandled error registering job ${this.jobName}`, ex);
                 }
             }
         });
@@ -58,6 +60,10 @@ export abstract class JobBase {
     }
 
     public async scheduleCronJob(context: JobContext, reschedule: boolean = false, data: {} | undefined = undefined): Promise<boolean> {
+
+        // Create logger
+        const logger = await Logger.Create('Job Base', context.settings);
+
         try {
             // Check the job list to determine if job is already scheduled
             const scheduledJob = await this.getScheduledJob(context.scheduler);
@@ -65,12 +71,12 @@ export abstract class JobBase {
 
                 // If not rescheduling, return
                 if (!reschedule) {
-                    console.log(`[JobBase.scheduleJob] Job ${this.jobName} already scheduled and was not asked to reschedule.`);
+                    logger.info(`ScheduleJob: Job ${this.jobName} already scheduled and was not asked to reschedule.`);
                     return true;
                 }
 
                 // Otherwise, cancel the currently scheduled job and reschedule
-                console.log(`[JobBase.scheduleJob] Found job ${this.jobName} is currently scheduled. Canceling current job and rescheduling.`);
+                logger.info(`ScheduleJob: Found job ${this.jobName} is currently scheduled. Canceling current job and rescheduling.`);
                 await context.scheduler.cancelJob(scheduledJob.id);
             }
 
@@ -84,33 +90,37 @@ export abstract class JobBase {
             // Store the job ID to redis
             await context.redis.set(this.redisKey, jobId);
 
-            console.log(`[JobBase.scheduleJob] Successfully scheduled ${this.jobName} job.`);
+            logger.info(`ScheduleJob: Successfully scheduled ${this.jobName} job.`);
             return true;
 
         } catch (ex) {
-            console.error(`[JobBase.scheduleJob] Error while scheduling ${this.jobName} job: `, ex);
+            logger.error(`ScheduleJob: Error while scheduling ${this.jobName} job: `, ex);
             throw ex;
         }
     }
 
     public async cancelJob(context: JobContext, disable: boolean = true): Promise<boolean> {
+
+        // Create logger
+        const logger = await Logger.Create('Job Base', context.settings);
+
         try {
             // Get scheduled job
             const scheduledJob = await this.getScheduledJob(context.scheduler);
             if (!scheduledJob) {
-                console.log(`[JobBase.cancelJob] Found job ${this.jobName} is not currently scheduled.`);
+                logger.info(`CancelJob: Found job ${this.jobName} is not currently scheduled.`);
                 return false;
             }
 
             // Cancel job
             await context.scheduler.cancelJob(scheduledJob.id);
-            console.log(`[JobBase.cancelJob] Successfully canceled job ${this.jobName}`);
+            logger.info(`CancelJob: Successfully canceled job ${this.jobName}`);
 
             // If asked to disable, also call disable
             return disable ? await this.disableJob(context.redis) : true;
 
         } catch(ex) {
-            console.error(`[JobBase.cancelJob] Error while canceling job ${this.jobName}`, ex);
+            logger.error(`CancelJob: Error while canceling job ${this.jobName}`, ex);
             throw ex;
         }
     }
@@ -121,19 +131,24 @@ export abstract class JobBase {
             return true;
 
         } catch(ex) {
-            console.error(`[JobBase.disable] Error while disabling job ${this.jobName}`, ex);
+            const logger = new Logger('Job Base');
+            logger.error(`Disable: Error while disabling job ${this.jobName}`, ex);
             throw ex;
         }
     }
 
     public async onAppUpdate(context: TriggerContext): Promise<void> {
+
+        // Create logger
+        const logger = await Logger.Create('Job Base', context.settings);
+
         try {
             // Convert TriggerContext to JobContext
             const jobContext = context satisfies JobContext;
 
             // Save if job is enabled
             const isEnabled = await this.isEnabled(context.redis);
-            console.log(`[JobBase.onAppUpdate] Found ${this.jobName} is ${isEnabled ? 'enabled. Canceling and rescheduling job.' : 'disabled. Canceling any scheduled instances.'}`)
+            logger.info(`OnAppUpdate: Found ${this.jobName} is ${isEnabled ? 'enabled. Canceling and rescheduling job.' : 'disabled. Canceling any scheduled instances.'}`)
 
             // Next, force cancel (and disable)
             await this.cancelJob(jobContext);
@@ -143,7 +158,7 @@ export abstract class JobBase {
                 await this.scheduleCronJob(jobContext, true);
 
         } catch(ex) {
-            console.error(`[JobBase.onAppUpdate] Error while running onAppUpdate for job ${this.jobName}.`, ex);
+            logger.error(`OnAppUpdate: Error while running onAppUpdate for job ${this.jobName}.`, ex);
         }
     }
 

@@ -12,6 +12,14 @@ export enum SettingsEnvironment {
     Production
 }
 
+export enum LogLevel {
+    Error,
+    Warn,
+    Info,
+    Debug,
+    Trace
+}
+
 enum SettingKeys {
 
     // Which Environment (Dev or Prod) to use when fetching API data. Default: Production
@@ -23,6 +31,9 @@ enum SettingKeys {
     // How many hours before considering summary data to be stale
     SummaryStaleHours = 'summary-stale-hours',
 
+    // Logging level
+    LogLevel = 'log-level',
+
     // Webhook URL to send notifications to
     DiscordNotificationUrl = 'discord-noti-url'
 }
@@ -30,7 +41,8 @@ enum SettingKeys {
 export class AppSettings {
 
     public static async GetEnvironment(settings: SettingsClient): Promise<SettingsEnvironment> {
-        return (await settings.get<string>(SettingKeys.RHurricaneEnvironment)) === SettingsEnvironment[SettingsEnvironment.Development]
+        const val = await settings.get<string[]>(SettingKeys.RHurricaneEnvironment);
+        return val && val.length > 0 && val[0] === SettingsEnvironment[SettingsEnvironment.Development]
             ? SettingsEnvironment.Development
             : SettingsEnvironment.Production;
     }
@@ -41,6 +53,12 @@ export class AppSettings {
 
     public static async GetStaleHours(settings: SettingsClient): Promise<number> {
         return await settings.get<number>(SettingKeys.SummaryStaleHours) ?? 12;
+    }
+
+    public static async GetLogLevel(settings: SettingsClient): Promise<LogLevel> {
+        const savedLvl = await settings.get<string[]>(SettingKeys.LogLevel);
+        const key = savedLvl && savedLvl.length > 0 && savedLvl[0] ? savedLvl[0] : null;
+        return (key ? LogLevel[key as keyof typeof LogLevel] : LogLevel.Error) ?? LogLevel.Error;
     }
 
     public static async GetDiscordNotificationUrl(settings: SettingsClient): Promise<string | undefined> {
@@ -56,14 +74,15 @@ export class AppSettings {
                 helpText: 'Production uses live data from the National Hurricane Center. Development uses test data.',
                 options: [
                     {
-                        label: 'Development',
-                        value: 'Development'
+                        label: SettingsEnvironment[SettingsEnvironment.Production],
+                        value: SettingsEnvironment[SettingsEnvironment.Production]
                     },
                     {
-                        label: 'Production',
-                        value: 'Production'
+                        label: SettingsEnvironment[SettingsEnvironment.Development],
+                        value: SettingsEnvironment[SettingsEnvironment.Development]
                     }
                 ],
+                defaultValue: [SettingsEnvironment[SettingsEnvironment.Production]],
                 multiSelect: false,
                 scope: SettingScope.Installation
             },
@@ -92,6 +111,37 @@ export class AppSettings {
                     if (event.value! < 1)
                         return 'Value must be at least 1';
                 }
+            },
+            {
+                type: 'select',
+                name: SettingKeys.LogLevel,
+                label: 'Log Level',
+                helpText: 'Configured the level of logging for performance.',
+                options: [
+                    {
+                        label: LogLevel[LogLevel.Error],
+                        value: LogLevel[LogLevel.Error]
+                    },
+                    {
+                        label: LogLevel[LogLevel.Warn],
+                        value: LogLevel[LogLevel.Warn]
+                    },
+                    {
+                        label: LogLevel[LogLevel.Info],
+                        value: LogLevel[LogLevel.Info]
+                    },
+                    {
+                        label: LogLevel[LogLevel.Debug],
+                        value: LogLevel[LogLevel.Debug]
+                    },
+                    {
+                        label: LogLevel[LogLevel.Trace],
+                        value: LogLevel[LogLevel.Trace]
+                    }
+                ],
+                defaultValue: [LogLevel[LogLevel.Warn]],
+                multiSelect: false,
+                scope: SettingScope.Installation
             },
             {
                 type: 'string',

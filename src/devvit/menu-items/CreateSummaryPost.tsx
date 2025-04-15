@@ -8,7 +8,8 @@
 import {Devvit} from "@devvit/public-api";
 import {DataUpdater} from "../jobs/DataUpdater.js";
 import {RedisService} from "../redis/RedisService.js";
-import {PostType} from "../../../shared/dtos/redis/IPostMetadataDto.js";
+import {AppSettings} from "../AppSettings.js";
+import {Logger} from "../Logger.js";
 
 export class CreateSummaryPostMenuItem {
 
@@ -17,27 +18,48 @@ export class CreateSummaryPostMenuItem {
             label: 'RHurricane - Create Summary Post',
             location: 'subreddit',
             onPress: async (_, context) => {
+
+                // Create logger
+                const logger = await Logger.Create('Menu - Create Summary', context.settings);
+                
                 try {
                     // Check the subredditName is not missing, as it is required for SubmitPost to work!
                     if (!context.subredditName) {
+                        logger.error('Context was missing Subreddit Name?!?');
                         context.ui.showToast({
                             text: 'ERROR: Context was missing the Subreddit Name? Shouldn\' happen...',
                             appearance: 'neutral'
-                        })
+                        });
                         return;
                     }
 
                     // Do not allow post creation if data update job is not scheduled
-                    if (!DataUpdater.Instance?.getScheduledJob(context.scheduler)) {
+                    const dataJob = DataUpdater.Instance;
+                    if (!dataJob ||
+                        !(await dataJob.getScheduledJob(context.scheduler)) ||
+                        !(await dataJob.isEnabled(context.redis)))
+                    {
+                        logger.error('The Data Update job is not currently running.');
                         context.ui.showToast({
                             text: 'ERROR: The Data Updated Job must be started before creating a summary post!',
                             appearance: 'neutral'
-                        })
+                        });
                         return;
                     }
 
-                    // TODO: Check redis to ensure data exists and is not stale/old (i.e. last modified < 24 hours)
+                    // Check redis to ensure data exists and is not stale/old (i.e. last modified < 24 hours)
                     const redis = new RedisService(context.redis);
+                    const lastModified = await redis.getSummaryApiLastModified();
+                    const staleSetting = await AppSettings.GetStaleHours(context.settings);
+                    const saleTime = new Date().getTime() - staleSetting * 3600000;
+                    if (!lastModified || new Date(lastModified).getTime() < saleTime) {
+                        logger.error(`Stale data detected! Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
+                        context.ui.showToast({
+                            text: 'ERROR: The Data Update job has not yet run!',
+                            appearance: 'neutral'
+                        });
+                        return;
+                    }
 
                     // Submit the new post
                     const post = await context.reddit.submitPost({
@@ -65,12 +87,22 @@ export class CreateSummaryPostMenuItem {
                             </zstack>
                         )
                     });
+                    logger.info(`Successfully created post: ${post.id}`);
 
                     // Save post type to redis
-                    await redis.savePostMetadata(post.id, { type: PostType.Summary });
+                    await redis.savePostMetadata(post.id, { type: 'summary' });
+
+                    // Show success message
+                    context.ui.showToast({
+                        text: 'Successfully created Summary Post!',
+                        appearance: 'success'
+                    });
+
+                    // Redirect to new post!
+                    context.ui.navigateTo(post);
 
                 } catch (ex) {
-                    console.error('[Menu - Create Summary] Error creating the summary post:', ex);
+                    logger.error('Error creating the summary post:', ex);
                     context.ui.showToast({
                         text: 'ERROR: There was an error creating the summary post.',
                         appearance: 'neutral'

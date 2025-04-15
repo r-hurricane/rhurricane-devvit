@@ -11,7 +11,7 @@ export type ShapeCoordinates = [number, number];
 
 export type ShapeGeometry = {
     type: string;
-    bbox: [number, number, number, number] | null;
+    bbox?: [number, number, number, number] | null;
     coordinates: ShapeCoordinates | ShapeCoordinates[] | ShapeCoordinates[][] | null;
 }
 
