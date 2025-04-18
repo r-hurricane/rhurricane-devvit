@@ -14,7 +14,6 @@ export interface TwoPageProps {
     two: TwoData | undefined
 }
 
-
 interface TwoStormProps {
     widgetWidth: number;
     storm: TwoAreaOfInterest;
@@ -165,7 +164,7 @@ export const TwoPage = (props: TwoPageProps) => {
                 >
                     {widgetWidth < 500 ? 'TWO' : 'Tropical Weather Outlook (TWO)'} - {renderDate(two.atlantic.issuedOn?.time) ?? ''}
                 </text>
-                <text size="xsmall">Open Details</text>
+                {/*<text size="xsmall">Open Details</text>*/}
             </vstack>
             <spacer size="medium" />
             <hstack>

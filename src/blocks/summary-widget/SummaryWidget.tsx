@@ -82,15 +82,17 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                     darkBackgroundColor="Global-Black"
                     onPress={() => {setActivePage('DIS')}}
                 >
-                    <text size="medium" weight="bold">&gt; &gt; &gt; Click to review Data Disclaimer! &lt; &lt; &lt;</text>
+                    <text size="medium" weight="bold">&gt; &gt; &gt; Press to review Data Disclaimer! &lt; &lt; &lt;</text>
                 </hstack>
             </vstack>
             {activePage === 'DIS' && (
-                <vstack width="100%" height="100%" padding="medium" alignment="top start" gap="medium" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
-                    <text style="heading" size="xxlarge">Data Disclaimer</text>
+                <vstack width="100%" height="100%" padding="medium" alignment="top start" gap="small" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+                    <text style="heading" size="xlarge">Data Disclaimer</text>
+                    <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white" />
                     <text size="xlarge" weight="bold" color="danger-plain" wrap>This app is is NOT an official government app and therefore should not be used for any decisions pertaining to your safety or security!</text>
-                    <text wrap size="large">Please visit the Official National Hurricane Center (NHC) (https://nhc.noaa.gov) or the Official Joint Typhoon Warning Center (JTWC) (https://www.metoc.navy.mil/ jtwc/jtwc.html) pages for official government warnings and data.</text>
+                    <text wrap>Please visit the Official National Hurricane Center (NHC) (https://nhc.noaa.gov) or the Official Joint Typhoon Warning Center (JTWC) (https://www.metoc.navy.mil/ jtwc/jtwc.html) pages for official government warnings and data.</text>
                     <text wrap>Data obtained from the National Hurricane Center (NHC) and National Weather Service (NWS)</text>
+                    <text wrap>Developed and maintained by u/Beach-Brews</text>
                     <hstack width="100%" alignment="bottom center">
                         <button width="100%" onPress={() => {setActivePage('TWO')}}>Acknowledged</button>
                     </hstack>

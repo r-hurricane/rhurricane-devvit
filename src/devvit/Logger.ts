@@ -12,6 +12,7 @@ export class Logger {
 
     #label: string;
     #logLevel: LogLevel;
+    #traceName: string | undefined;
 
     public static async Create(label: string, settings: SettingsClient): Promise<Logger> {
         return new Logger(label, await AppSettings.GetLogLevel(settings));
@@ -26,29 +27,40 @@ export class Logger {
 
     public set logLevel(val: LogLevel) { this.#logLevel = val; }
 
+    public traceStart(name: string) {
+        this.#traceName = name;
+        this.trace(`===== Start - ${name} =====`);
+    }
+
+    public traceEnd() {
+        if (!this.#traceName) throw new Error('traceEnd was called before traceStart');
+        this.trace(`===== End - ${this.#traceName} =====`);
+        this.#traceName = undefined;
+    }
+
     public trace(...msg: any[]): void {
         if (this.isLogEnabled(LogLevel.Trace))
-            console.trace(this.formatMessage(LogLevel.Error, msg));
+            console.trace(this.formatMessage(LogLevel.Trace, ...msg));
     }
 
     public debug(...msg: any[]): void {
         if (this.isLogEnabled(LogLevel.Debug))
-            console.debug(this.formatMessage(LogLevel.Error, msg));
+            console.debug(this.formatMessage(LogLevel.Debug, ...msg));
     }
 
     public info(...msg: any[]): void {
         if (this.isLogEnabled(LogLevel.Info))
-            console.log(this.formatMessage(LogLevel.Error, msg));
+            console.log(this.formatMessage(LogLevel.Info, ...msg));
     }
 
     public warn(...msg: any[]): void {
         if (this.isLogEnabled(LogLevel.Warn))
-            console.warn(this.formatMessage(LogLevel.Error, msg));
+            console.warn(this.formatMessage(LogLevel.Warn, ...msg));
     }
 
     public error(...msg: any[]): void {
         if (this.isLogEnabled(LogLevel.Error))
-            console.error(this.formatMessage(LogLevel.Error, msg));
+            console.error(this.formatMessage(LogLevel.Error, ...msg));
     }
 
     public isLogEnabled(level: LogLevel): boolean {

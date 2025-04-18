@@ -13,7 +13,6 @@ interface AtcfPageProps {
     atcf: AtcfData[] | undefined;
 }
 
-
 interface AtcfStormProps {
     context: Context;
     storm: AtcfData;
@@ -63,6 +62,9 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
     }${p(' - ', windCat != 'TD' ? windCat : null)}`;
     const colorScheme = 'PureGray';
 
+    const lat = c.lat ?? 0;
+    const lon = c.lon ?? 0;
+
     return (
         <vstack>
             <spacer size="xsmall" />
@@ -76,8 +78,10 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
                 darkBorderColor={colorScheme+'-600'}
             >
                 <text style="heading">{name}</text>
+                <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white" />
+                <spacer size="small" />
                 {pRow(c.date, 'Updated', getDate(c.date))}
-                {pRow(c.lon, 'Pos', `${c.lat?.toFixed(1) ?? 0} ${c.lon?.toFixed(1) ?? 0}`)}
+                {pRow(c.lon, 'Pos', `${lat.toFixed(1)}${lat > 0 ? 'N' : 'S'} ${lon.toFixed(1)}${lon > 0 ? 'E' : 'W'}`)}
                 {pRow(c.maxSusWind, 'Wind', `${c.maxSusWind}kt${p(' / ', c.windGust, 'kt')}${p(' @ ', c.maxWindRad, 'nmi')}`)}
                 {pRow(c.minSeaLevelPsur, 'Psur', `${c.minSeaLevelPsur}mb${p(' - ', c.outerPsur, 'mb')}${p(' @ ', c.outerRad, 'nmi')}`)}
                 {pRow(c.depth, 'Depth', `${c.depth}`)}
@@ -158,7 +162,7 @@ export const AtcfPage = (props: AtcfPageProps) => {
                 darkBorderColor="PureGray-600"
             >
                 <text weight="bold" size="large">{widgetWidth < 500 ? 'Auto Trop Cyclone Forecast (ATCF)' : 'Automatic Tropical Cyclone Forecast (ATCF)'}</text>
-                <text size="xsmall">Open Details</text>
+                {/*<text size="xsmall">Open Details</text>*/}
             </vstack>
             <spacer size="medium" />
             {atcfStorms && atcfStorms.length > 0 ? atcfStorms : <AtcfNone />}

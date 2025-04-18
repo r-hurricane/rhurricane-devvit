@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * The DataUpdater job will periodically check the rhurricane.net APIs for changes in hurricane data. If there are data
  * updates, it then:
  * > Saves required data in Redis for faster access/rendering in
@@ -47,27 +47,34 @@ export class DataUpdater extends JobBase {
 
         // Create log helper
         const logger = await Logger.Create('Data Updater', context.settings);
+        logger.traceStart('OnRun');
 
         let notifier: Notifier | undefined;
 
         try {
             // Create notifier
             notifier = await Notifier.Create(context.settings);
+            logger.debug('Created notifier');
 
             // Get the environment setting to know whether to use the dev domain or not
             const environment = await AppSettings.GetEnvironment(context.settings);
+            logger.debug('Environment:', environment);
             const summaryApiUrl = `https://${environment === SettingsEnvironment.Development ? 'dev.' : ''}rhurricane.net/api/v1/?full=1`;
+            logger.debug('SummaryApiUrl:', summaryApiUrl);
 
             // Get the last modified date from Redis
             const redis = new RedisService(context.redis);
             const lastModified = await redis.getSummaryApiLastModified();
+            logger.debug('Redis LastModified:', lastModified);
 
             // Call summary API
+            logger.debug('Calling API');
             const apiResult = await fetch(summaryApiUrl, {
                 headers: lastModified ? {
                     'If-Modified-Since': lastModified
                 } : undefined
             });
+            logger.debug('API return status: ', apiResult.status);
 
             // If response was 304, the data has not been modified since last check.
             if (apiResult.status === 304) {
@@ -85,7 +92,8 @@ export class DataUpdater extends JobBase {
 
             // If not a 200 status
             if (apiResult.status !== 200) {
-               const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!\n\n${await apiResult.text()}`;
+                //const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!\n\n${await apiResult.text()}`;
+                const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!`;
                 logger.error(message);
                 await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - API Call Failed\n\n${message}`);
                 return;
@@ -105,7 +113,7 @@ export class DataUpdater extends JobBase {
             }
 
         } catch (e) {
-            logger.error('Error during update process :', e);
+            logger.error('Error during update process:', e);
 
             try {
                 if (!notifier || !notifier.enabled) {
@@ -119,5 +127,7 @@ export class DataUpdater extends JobBase {
                 logger.error('Error while trying to send notification! ', e2);
             }
         }
+
+        logger.traceEnd();
     }
 }
