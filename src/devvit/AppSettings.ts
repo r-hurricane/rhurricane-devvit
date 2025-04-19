@@ -38,7 +38,10 @@ enum SettingKeys {
     LogLevel = 'log-level',
 
     // Webhook URL to send notifications to
-    DiscordNotificationUrl = 'discord-noti-url'
+    DiscordNotificationUrl = 'discord-noti-url',
+
+    // How frequently (in minutes) the same notification should be silenced
+    NotificationSilence = 'noti-silence'
 }
 
 export class AppSettings {
@@ -71,6 +74,11 @@ export class AppSettings {
     // Gets the discord notification webhook url, if provided
     public static async GetDiscordNotificationUrl(settings: SettingsClient): Promise<string | undefined> {
         return await settings.get<string>(SettingKeys.DiscordNotificationUrl);
+    }
+
+    // Gets frequency (in minutes) the same notification should be silenced
+    public static async GetNotificationSilence(settings: SettingsClient): Promise<number> {
+        return await settings.get<number>(SettingKeys.NotificationSilence) ?? 30;
     }
 
     public static RegisterSettings(): void {
@@ -163,6 +171,18 @@ export class AppSettings {
                     ) {
                         return `Value must be a valid discord webhook URL.`
                     }
+                }
+            },
+            {
+                type: 'number',
+                name: SettingKeys.NotificationSilence,
+                label: 'Notification Silence (min)',
+                helpText: 'How long to silence the same notification sent to Discord.',
+                defaultValue: 30,
+                scope: SettingScope.Installation,
+                onValidate: event => {
+                    if (event.value! < 0)
+                        return 'Value must be at least 0';
                 }
             }
         ]);

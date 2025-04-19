@@ -10,6 +10,7 @@ import {PostMetadataSchema} from "./schemas/PostMetadataSchema.js";
 import {SummaryPostMetadataDto} from "../../../shared/dtos/redis/PostMetadataDto.js";
 import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
 import {SummaryApiSchema} from "./schemas/summary-api/SummaryApiSchema.js";
+import {LastNotificationDto, LastNotificationSchema} from "./schemas/LastNotificationSchema.js";
 
 export class RedisService {
 
@@ -18,7 +19,8 @@ export class RedisService {
     #redisKeys = {
         postMetadata: (params: string) => `rhurricane:postmeta:${params[0]}`,
         summaryApiLastModified: () => `rhurricane:summaryapi:last_modified`,
-        summaryApiData: () => `rhurricane:summaryapi:data`
+        summaryApiData: () => `rhurricane:summaryapi:data`,
+        lastNotification: () => `rhurricane:notify:last`
     };
 
     constructor(redis: Devvit.Context['redis']) {
@@ -71,6 +73,24 @@ export class RedisService {
     public async saveSummaryApiData(summaryApiData: any): Promise<string> {
         await SummaryApiSchema.parseAsync(summaryApiData);
         return await this.#redis.set(this.#redisKeys.summaryApiData(), JSON.stringify(summaryApiData));
+    }
+
+    /* =================================== */
+    /* ===== Notification Rate Limit ===== */
+    /* =================================== */
+    public async getLastNotification(): Promise<LastNotificationDto | null> {
+        const savedJson = await this.#redis.get(this.#redisKeys.lastNotification());
+        if (!savedJson) return null;
+
+        const parsedJson = await LastNotificationSchema.parseAsync(JSON.parse(savedJson));
+        return parsedJson satisfies LastNotificationDto;
+    }
+
+    public async saveLastNotification(text: string): Promise<string> {
+        return await this.#redis.set(this.#redisKeys.lastNotification(), JSON.stringify({
+            text: text,
+            time: new Date().getTime()
+        } satisfies LastNotificationDto));
     }
 
 }

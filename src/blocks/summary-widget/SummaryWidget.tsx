@@ -73,7 +73,7 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.atcf?.count} title="ATCF" />
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.tcpod?.count} title="TCPOD" />
                 </hstack>
-                {!loaded && <LoadingOrError message='Loading Tropical Weather Outlook...' />}
+                {!loaded && <LoadingOrError error={!!error} message='Loading Tropical Weather Outlook...' />}
                 {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={twoData?.two?.data} />}
                 {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} atcf={twoData?.atcf?.data} />}
                 {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} tcpod={twoData?.tcpod?.data} />}

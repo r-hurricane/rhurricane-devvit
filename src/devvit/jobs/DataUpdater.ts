@@ -54,13 +54,13 @@ export class DataUpdater extends JobBase {
         try {
             // Create notifier
             // TODO: Write something to prevent notification of the same error every 60 seconds...
-            notifier = await Notifier.Create(context.settings);
+            notifier = await Notifier.Create(context);
             logger.debug('Created notifier');
 
             // Get the environment setting to know whether to use the dev domain or not
             const environment = await AppSettings.GetEnvironment(context.settings);
             logger.debug('Environment:', environment);
-            const summaryApiUrl = `https://${environment === SettingsEnvironment.Development ? 'dev.' : ''}rhurricane.net/api/v1/?full=1`;
+            const summaryApiUrl = `https://${environment === SettingsEnvironment.Development ? 'dev.' : ''}rhurricane.net/api/v1/`;
             logger.debug('SummaryApiUrl:', summaryApiUrl);
 
             // Get the last modified date from Redis
@@ -93,8 +93,7 @@ export class DataUpdater extends JobBase {
 
             // If not a 200 status
             if (apiResult.status !== 200) {
-                //const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!\n\n${await apiResult.text()}`;
-                const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!`;
+                const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!\n\n${await apiResult.text()}`;
                 logger.error(message);
                 await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - API Call Failed\n\n${message}`);
                 return;
@@ -102,6 +101,7 @@ export class DataUpdater extends JobBase {
 
             // Save the API result to Redis for the summary post!
             await redis.saveSummaryApiData(await apiResult.json());
+            logger.info('Saved new API data to Redis!');
 
             // Finally, write back the last-modified date (from API call) to Redis once all actions are successful
             const apiLastModified = apiResult.headers.get('Last-Modified');
