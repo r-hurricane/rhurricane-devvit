@@ -17,7 +17,7 @@ interface CustomPostTypeProps {
 
 const CustomPostType = (props: CustomPostTypeProps) => {
     // Get post type from Redis
-    // TODO: Should I aso fetch post specific data, such as the TWO, and return that instead?
+    // TODO: Should I fetch post specific data, such as the TWO, and return that instead? Prevents two useAsync calls.
     const {data, loading, error} = useAsync(
         async () => {
             const redis = new RedisService(props.context.redis);
@@ -46,6 +46,7 @@ const CustomPostType = (props: CustomPostTypeProps) => {
     }
 };
 
+// Registers the custom post type with Devvit
 export const registerCustomPostType = () => {
     // Add the custom post type to Devvit
     Devvit.addCustomPostType({

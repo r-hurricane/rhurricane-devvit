@@ -7,11 +7,13 @@
 
 import {Devvit, SettingsClient, SettingScope} from '@devvit/public-api';
 
+// Represents the data environment. Prod uses live NHC data. Dev uses mock or old data for testing.
 export enum SettingsEnvironment {
     Development,
     Production
 }
 
+// Represents the log level of the application.
 export enum LogLevel {
     Error,
     Warn,
@@ -20,6 +22,7 @@ export enum LogLevel {
     Trace
 }
 
+// An enum of all settings keys (internal AppSettings use only)
 enum SettingKeys {
 
     // Which Environment (Dev or Prod) to use when fetching API data. Default: Production
@@ -40,27 +43,32 @@ enum SettingKeys {
 
 export class AppSettings {
 
+    // Gets the current data environment: Prod = live NHC data, Dev = mock/test data
     public static async GetEnvironment(settings: SettingsClient): Promise<SettingsEnvironment> {
         const val = await settings.get<string[]>(SettingKeys.RHurricaneEnvironment);
-        return val && val.length > 0 && val[0] === SettingsEnvironment[SettingsEnvironment.Development]
-            ? SettingsEnvironment.Development
-            : SettingsEnvironment.Production;
+        return val && val.length > 0 && val[0] === SettingsEnvironment[SettingsEnvironment.Production]
+            ? SettingsEnvironment.Production
+            : SettingsEnvironment.Development;
     }
 
+    // Gets the updater job frequency (in minutes)
     public static async GetUpdateFrequency(settings: SettingsClient): Promise<number> {
         return await settings.get<number>(SettingKeys.SummaryUpdateFrequency) ?? 1;
     }
 
+    // Gets the configured number of hours before considering the API data to be stale and inaccurate
     public static async GetStaleHours(settings: SettingsClient): Promise<number> {
         return await settings.get<number>(SettingKeys.SummaryStaleHours) ?? 12;
     }
 
+    // Gets the configured log level to reduce the amount of logs
     public static async GetLogLevel(settings: SettingsClient): Promise<LogLevel> {
         const savedLvl = await settings.get<string[]>(SettingKeys.LogLevel);
         const key = savedLvl && savedLvl.length > 0 && savedLvl[0] ? savedLvl[0] : null;
         return (key ? LogLevel[key as keyof typeof LogLevel] : LogLevel.Error) ?? LogLevel.Error;
     }
 
+    // Gets the discord notification webhook url, if provided
     public static async GetDiscordNotificationUrl(settings: SettingsClient): Promise<string | undefined> {
         return await settings.get<string>(SettingKeys.DiscordNotificationUrl);
     }

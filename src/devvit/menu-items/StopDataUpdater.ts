@@ -21,6 +21,7 @@ export class StopDataUpdaterMenuItem {
                 const logger = await Logger.Create('Menu - Stop Update', context.settings);
                 
                 try {
+                    // Get update job instance
                     const job = DataUpdater.Instance;
                     if (!job) {
                         context.ui.showToast({
@@ -31,6 +32,7 @@ export class StopDataUpdaterMenuItem {
                         return;
                     }
 
+                    // Cancel the job if scheduled
                     await job.cancelJob(context);
 
                     context.ui.showToast({

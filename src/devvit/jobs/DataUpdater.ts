@@ -6,7 +6,7 @@
  *   - StormWidget (future)
  *   - ReconWidget (future)
  * > (Planned) Updates the community sidebar text widget (New and Old Reddit)
- * > (Planned) Updates community status/emoji
+ * > (Planned) Updates community status/emoji once Reddit has APIs to do so ;) (WINK WINK TO YOU REDDIT ADMIN REVIEWING)
  * > (Planned) Community style
  * > (Planned) Other automation, like mega-thread creation for after storm discussions
  *
@@ -53,6 +53,7 @@ export class DataUpdater extends JobBase {
 
         try {
             // Create notifier
+            // TODO: Write something to prevent notification of the same error every 60 seconds...
             notifier = await Notifier.Create(context.settings);
             logger.debug('Created notifier');
 
@@ -105,7 +106,7 @@ export class DataUpdater extends JobBase {
             // Finally, write back the last-modified date (from API call) to Redis once all actions are successful
             const apiLastModified = apiResult.headers.get('Last-Modified');
             if (apiLastModified) {
-                await redis.setSummaryApiLastModified(apiLastModified);
+                await redis.saveSummaryApiLastModified(apiLastModified);
                 logger.info(`Saved last modified date ${apiLastModified} from API!`);
 
             } else {

@@ -21,6 +21,7 @@ export class StartDataUpdaterMenuItem {
                 const logger = await Logger.Create('Menu - Start Update', context.settings);
 
                 try {
+                    // Get the data update job instance
                     const job = DataUpdater.Instance;
                     if (!job) {
                         context.ui.showToast({
@@ -31,6 +32,7 @@ export class StartDataUpdaterMenuItem {
                         return;
                     }
 
+                    // Schedule the job (it checks if already scheduled)
                     await job.scheduleCronJob(context);
 
                     context.ui.showToast({

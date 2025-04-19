@@ -25,6 +25,9 @@ export class RedisService {
         this.#redis = redis;
     }
 
+    /* ========================= */
+    /* ===== Post Metadata ===== */
+    /* ========================= */
     public async getPostMetadata(postId: string): Promise<SummaryPostMetadataDto | null> {
         const savedJson = await this.#redis.get(this.#redisKeys.postMetadata(postId));
         if (!savedJson) return null;
@@ -43,14 +46,20 @@ export class RedisService {
         return await this.#redis.set(this.#redisKeys.postMetadata(postId), JSON.stringify(metadata));
     }
 
+    /* ================================= */
+    /* ===== Summary Last Modified ===== */
+    /* ================================= */
     public async getSummaryApiLastModified(): Promise<string | undefined> {
         return await this.#redis.get(this.#redisKeys.summaryApiLastModified());
     }
 
-    public async setSummaryApiLastModified(lastModified: string): Promise<void> {
+    public async saveSummaryApiLastModified(lastModified: string): Promise<void> {
         await this.#redis.set(this.#redisKeys.summaryApiLastModified(), lastModified);
     }
 
+    /* ============================ */
+    /* ===== Summary API Data ===== */
+    /* ============================ */
     public async getSummaryApiData(): Promise<SummaryApiDto | null> {
         const savedJson = await this.#redis.get(this.#redisKeys.summaryApiData());
         if (!savedJson) return null;

@@ -9,22 +9,14 @@ import {Devvit, Context} from "@devvit/public-api";
 import {TwoAreaOfInterest, TwoData} from "../../../../shared/dtos/redis/summary-api/SummaryApiTwoDtos.js";
 import SizeString = Devvit.Blocks.SizeString;
 
-export interface TwoPageProps {
-    context: Context;
-    two: TwoData | undefined
-}
-
-interface TwoStormProps {
-    widgetWidth: number;
-    storm: TwoAreaOfInterest;
-}
-
+// Helper function to get the color scheme for the header and area of interest (AOI) color
 const chanceColorScheme = (chance: number) => {
     return chance > 60 ? 'Red' :
         chance >= 40 ? 'YellowOrange' :
             chance > 0 ? 'Yellow' : 'PureGray';
 };
 
+// Helper to get the AOI X icon
 const chanceImage = (chance: number) => {
     const name = chance > 60
         ? 'high'
@@ -39,6 +31,12 @@ const chanceImage = (chance: number) => {
         imageWidth="20px"
         imageHeight="20px" />;
 };
+
+// Renders the chances and heading for each tracked Area of Interest (AOI)
+interface TwoStormProps {
+    widgetWidth: number;
+    storm: TwoAreaOfInterest;
+}
 
 const AreaOfInterest = (props: TwoStormProps) => {
     const maxChance = Math.max(props.storm.twoDay?.chance ?? 0, props.storm.sevenDay?.chance ?? 0);
@@ -70,6 +68,7 @@ const AreaOfInterest = (props: TwoStormProps) => {
     );
 };
 
+// Renders the no activity message
 const NoActivityExpected = () => {
     return (
         <vstack>
@@ -92,11 +91,10 @@ const NoActivityExpected = () => {
     );
 };
 
-const renderDate = (time: number | undefined | null): string => {
-    if (!time) return 'Unknown';
-    const date = new Date(time);
-    if (!date || isNaN(date.getTime())) return 'Unknown';
-    return `${date.getUTCFullYear()}-${(date.getUTCMonth()+1).toString().padStart(2, '0')}-${date.getUTCDate().toString().padStart(2, '0')} ${date.getUTCHours().toString().padStart(2, '0')}z`;
+// Renders the Tropical Weather Outlook data
+export interface TwoPageProps {
+    context: Context;
+    two: TwoData | undefined
 }
 
 export const TwoPage = (props: TwoPageProps) => {
@@ -145,6 +143,14 @@ export const TwoPage = (props: TwoPageProps) => {
         ? two.pacific.areas.map(s => (<AreaOfInterest widgetWidth={widgetWidth} storm={s} />))
         : (<NoActivityExpected />);
 
+    // Helper to render TWO heading date
+    const renderDate = (time: number | undefined | null): string => {
+        if (!time) return 'Unknown';
+        const date = new Date(time);
+        if (!date || isNaN(date.getTime())) return 'Unknown';
+        return `${date.getUTCFullYear()}-${(date.getUTCMonth()+1).toString().padStart(2, '0')}-${date.getUTCDate().toString().padStart(2, '0')} ${date.getUTCHours().toString().padStart(2, '0')}z`;
+    }
+
     return (
         <vstack>
             <spacer size="medium" />
@@ -162,8 +168,9 @@ export const TwoPage = (props: TwoPageProps) => {
                     weight="bold"
                     size="large"
                 >
-                    {widgetWidth < 500 ? 'TWO' : 'Tropical Weather Outlook (TWO)'} - {renderDate(two.atlantic.issuedOn?.time) ?? ''}
+                    {widgetWidth < 500 ? 'Outlook (TWO)' : 'Tropical Weather Outlook (TWO)'} - {renderDate(two.atlantic.issuedOn?.time) ?? ''}
                 </text>
+                {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
             </vstack>
             <spacer size="medium" />

@@ -9,7 +9,7 @@
  * License: BSD-3-Clause
  */
 
-import {Context, Devvit, useState, useAsync} from "@devvit/public-api";
+import {Context, Devvit, useAsync, useState} from "@devvit/public-api";
 import {MenuItem} from './MenuItem.js';
 import {TwoPage} from "./two/TwoPage.js";
 import {AtcfPage} from "./atcf/AtcfPage.js";
@@ -17,7 +17,7 @@ import {TcpodPage} from "./tcpod/TcpodPage.js";
 import {RedisService} from "../../devvit/redis/RedisService.js";
 import {LoadingOrError} from "../LoadingOrError.js";
 import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
-import {AppSettings} from "../../devvit/AppSettings.js";
+import {AppSettings, SettingsEnvironment} from "../../devvit/AppSettings.js";
 
 export interface SummaryWidgetProps {
     context: Context;
@@ -47,8 +47,13 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
             if (date.getTime() < saleTime)
                 throw new Error(`[Summary Post] API Data is stale, last modified at ${lastMod} which is over ${staleSetting} hours ago!`);
 
+            // Get whether is the development data environment or not
+            const isDev = (await AppSettings.GetEnvironment(props.context.settings)) !== SettingsEnvironment.Production;
+
             // Finally, fetch the actual data!
-            return await redis.getSummaryApiData();
+            const summaryApiData = await redis.getSummaryApiData();
+
+            return { isDev, summaryApiData };
         },
         {
             finally: (_, error) => {
@@ -58,7 +63,7 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
         }
     );
     const loaded = !loading && !error;
-    const twoData: SummaryApiDto | null = loaded ? data : null;
+    const twoData: SummaryApiDto | null = data?.summaryApiData ?? null;
 
     return (
         <zstack width="100%" height="100%">
@@ -74,16 +79,18 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                 {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} tcpod={twoData?.tcpod?.data} />}
             </vstack>
             <vstack width="100%" height="100%" alignment="bottom start">
-                <hstack
+                <vstack
                     width="100%"
                     border="thin"
                     alignment="top center"
                     lightBackgroundColor="Global-White"
                     darkBackgroundColor="Global-Black"
                     onPress={() => {setActivePage('DIS')}}
+                    padding="xsmall"
                 >
+                    {data?.isDev === true && (<text size="medium" weight="bold" color="danger-plain">TEST DATA - NOT LIVE STORM DATA</text>)}
                     <text size="medium" weight="bold">&gt; &gt; &gt; Press to review Data Disclaimer! &lt; &lt; &lt;</text>
-                </hstack>
+                </vstack>
             </vstack>
             {activePage === 'DIS' && (
                 <vstack width="100%" height="100%" padding="medium" alignment="top start" gap="small" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">

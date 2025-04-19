@@ -1,5 +1,5 @@
 ﻿/*!
- * Defines the ATCF parts of the Summary API.
+ * Defines the ATCF parts of the Summary API, used by the Blocks or Webview.
  *
  * Author: u/Beach-Brews
  * License: BSD-3-Clause

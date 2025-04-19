@@ -20,7 +20,7 @@ export class AppUpgradeTrigger {
                 const logger = await Logger.Create('App Update', context.settings);
 
                 try {
-
+                    // Call the onAppUpdate on all jobs
                     for (let j of JobController.Instance.jobList) {
                         await j.onAppUpdate(context);
                     }

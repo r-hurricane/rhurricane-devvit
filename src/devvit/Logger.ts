@@ -1,5 +1,8 @@
 ﻿/*!
- * Helper for log messages.
+ * Helper for log messages. Ensures the date, area of the app, and love level are logged along with the provided
+ * message. Errors are also formatted to make review easier!
+ *
+ * WINK WINK REDDIT ADMIN REVIEWING ;)
  *
  * Author: u/Beach-Brews
  * License: BSD-3-Clause
