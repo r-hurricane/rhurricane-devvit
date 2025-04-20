@@ -2,13 +2,13 @@
  * The DataUpdater job will periodically check the rhurricane.net APIs for changes in hurricane data. If there are data
  * updates, it then:
  * > Saves required data in Redis for faster access/rendering in
- *   - SummaryWidget
- *   - StormWidget (future)
- *   - ReconWidget (future)
+ *   - Summary Post
+ *   - Storm Post (future)
+ *   - Recon Post (future)
  * > (Planned) Updates the community sidebar text widget (New and Old Reddit)
  * > (Planned) Updates community status/emoji once Reddit has APIs to do so ;) (WINK WINK TO YOU REDDIT ADMIN REVIEWING)
- * > (Planned) Community style
- * > (Planned) Other automation, like mega-thread creation for after storm discussions
+ * > (Planned) Community style changes
+ * > (Planned) Other automation, like mega-thread creation for after storm discussions + detection of posts
  *
  * Author: u/Beach-Brews
  * License: BSD-3-Clause
@@ -53,7 +53,6 @@ export class DataUpdater extends JobBase {
 
         try {
             // Create notifier
-            // TODO: Write something to prevent notification of the same error every 60 seconds...
             notifier = await Notifier.Create(context);
             logger.debug('Created notifier');
 

@@ -132,7 +132,7 @@ export class AppSettings {
                 type: 'select',
                 name: SettingKeys.LogLevel,
                 label: 'Log Level',
-                helpText: 'Configured the level of logging for performance.',
+                helpText: 'Controls the level of log messages for performance.',
                 options: [
                     {
                         label: LogLevel[LogLevel.Error],
