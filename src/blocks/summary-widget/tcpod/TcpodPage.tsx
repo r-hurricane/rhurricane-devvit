@@ -11,6 +11,9 @@ import {
     Nous42Mission, Nous42Outlook,
     TcpodData
 } from "../../../../shared/dtos/redis/summary-api/SummaryApiTcpodDtos.js";
+import {Container} from "../common/Container.js";
+import {NoDetails} from "../common/NoDetails.js";
+import {formatDate} from "../../../../shared/render/formatDate.js";
 
 // Renders the missions for each storm provided
 export interface StormListProps {
@@ -23,22 +26,7 @@ export const StormList = (props: StormListProps) => {
     const keys = Object.keys(props.storms);
     if (keys.length <= 0) {
         return (
-            <vstack>
-                <hstack
-                    height="100px"
-                    alignment="middle center"
-                    padding="small"
-                    border="thin"
-                    cornerRadius="medium"
-                    lightBackgroundColor="PureGray-100"
-                    backgroundColor="PureGray-800"
-                    lightBorderColor="PureGray-300"
-                    darkBorderColor="PureGray-600"
-                    gap="small"
-                >
-                    <text size="xlarge" width="100%" wrap alignment="middle center">No missions scheduled.</text>
-                </hstack>
-            </vstack>
+            <NoDetails>No missions scheduled.</NoDetails>
         );
     }
 
@@ -76,15 +64,7 @@ export const StormList = (props: StormListProps) => {
     return (
         <vstack>
             {Object.keys(props.storms).map(k => (
-                <vstack
-                    padding="small"
-                    border="thin"
-                    lightBackgroundColor="PureGray-100"
-                    darkBackgroundColor="PureGray-800"
-                    lightBorderColor="PureGray-300"
-                    darkBorderColor="PureGray-600"
-                    cornerRadius="medium"
-                >
+                <Container>
                     <text weight="bold">{k}</text>
                     <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white"></hstack>
                     <spacer size="xsmall" />
@@ -101,7 +81,7 @@ export const StormList = (props: StormListProps) => {
                             );
                         })}
                     </vstack>
-                </vstack>
+                </Container>
             ))}
         </vstack>
     );
@@ -117,43 +97,20 @@ export const TcpodOutlook = (props: TcpodOutlookProps) => {
     // If no (non-negative) outlook text, display no outlook
     if (props.outlook.length <= 0) {
         return (
-            <vstack>
-                <hstack
-                    height="100px"
-                    alignment="middle center"
-                    padding="small"
-                    border="thin"
-                    cornerRadius="medium"
-                    lightBackgroundColor="PureGray-100"
-                    backgroundColor="PureGray-800"
-                    lightBorderColor="PureGray-300"
-                    darkBorderColor="PureGray-600"
-                    gap="small"
-                >
-                    <text size="xlarge" width="100%" wrap alignment="middle center">Outlook is negative.</text>
-                </hstack>
-            </vstack>
+            <NoDetails>Outlook is negative.</NoDetails>
         );
     }
 
     // Otherwise, print each outlook text
     return (
-        <vstack
-            padding="small"
-            border="thin"
-            lightBackgroundColor="PureGray-100"
-            darkBackgroundColor="PureGray-800"
-            lightBorderColor="PureGray-300"
-            darkBorderColor="PureGray-600"
-            cornerRadius="medium"
-        >
+        <Container>
             <text weight="bold">Tomorrow's Outlook</text>
             <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white"></hstack>
             <spacer size="small" />
             <vstack gap="small">
                 {props.outlook.map(o => (<text wrap>* {o.text}</text>))}
             </vstack>
-        </vstack>
+        </Container>
     );
 }
 
@@ -176,7 +133,7 @@ export const TcpodBasinButton = (props: TcpodBasinButtonProps) => {
             cornerRadius="medium"
             lightBackgroundColor={isActive ? 'AlienBlue-100' : (hasCount ? 'Yellow-50' : 'PureGray-50')}
             lightBorderColor={isActive ? 'AlienBlue-700' : (hasCount ? 'Yellow-300' : 'PureGray-300')}
-            darkBackgroundColor={isActive ? 'AlienBlue-800' : (hasCount ? 'Yellow-800' : 'PureGray-800')}
+            darkBackgroundColor={isActive ? 'AlienBlue-800' : (hasCount ? 'Yellow-800' : 'PureGray-900')}
             darkBorderColor={isActive ? 'AlienBlue-400' : (hasCount ? 'Yellow-600' : 'PureGray-600')}
             width="50%"
             alignment="middle center"
@@ -199,6 +156,7 @@ export const TcpodBasinButton = (props: TcpodBasinButtonProps) => {
 // Renders the hurricane hunter recon schedule (TCPOD) page
 export interface TcpodPageProps {
     context: Context;
+    lastModified: number | null | undefined;
     tcpod: TcpodData | undefined;
 }
 
@@ -212,24 +170,9 @@ export const TcpodPage = (props: TcpodPageProps) => {
         return (
             <vstack>
                 <spacer size="medium" />
-                <vstack
-                    padding="small"
-                    border="thin"
-                    lightBackgroundColor="PureGray-100"
-                    darkBackgroundColor="PureGray-800"
-                    lightBorderColor="PureGray-300"
-                    darkBorderColor="PureGray-600"
-                    alignment="center middle"
-                    cornerRadius="medium"
-                >
-                    <text
-                        weight="bold"
-                        size="large"
-                        wrap
-                    >
-                        Failed to load Tropical Cyclone Plan of the Day schedule. Try again later.
-                    </text>
-                </vstack>
+                <NoDetails weight="bold">
+                    Failed to load Tropical Cyclone Plan of the Day schedule. Try again later.
+                </NoDetails>
             </vstack>
         );
     }
@@ -272,20 +215,23 @@ export const TcpodPage = (props: TcpodPageProps) => {
     return (
         <vstack width="100%">
             <spacer size="medium" />
-            <vstack
-                padding="small"
-                border="thin"
-                alignment="center middle"
-                cornerRadius="medium"
-                lightBackgroundColor="PureGray-100"
-                darkBackgroundColor="PureGray-800"
-                lightBorderColor="PureGray-300"
-                darkBorderColor="PureGray-600"
-            >
-                <text weight="bold" size="large">{widgetWidth < 500 ? 'Recon Mission Schedule (TCPOD)' : 'Tropical Cyclone Plan of the Day (TCPOD)'}</text>
+            <Container alignment="middle center">
+                <text weight="bold" size="large">
+                    {widgetWidth < 500 ?
+                        'Recon Mission Schedule (TCPOD)'
+                        : 'Tropical Cyclone Plan of the Day (TCPOD)'
+                    }
+                </text>
+                <text size="small">
+                    {
+                        formatDate(props.tcpod?.today?.message?.header?.issued?.time
+                            ?? props.tcpod?.tomorrow?.message?.header?.issued?.time
+                            ?? props.lastModified)
+                    }
+                </text>
                 {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
-            </vstack>
+            </Container>
             <spacer size="medium" />
             <hstack width="100%" gap="small">
                 <TcpodBasinButton title="Atlantic" missions={atlanticCounts.missionCount} outlook={atlanticCounts.outlookCount} activeBasin={activeBasin} setActiveBasin={setActiveBasin} />

@@ -25,7 +25,7 @@ import {TcpodData} from "./SummaryApiTcpodDtos.js";
 
 export type SummaryApiData<TData> = {
     data: TData;
-    lastModified: number;
+    lastModified: number | null;
     count: number;
 }
 

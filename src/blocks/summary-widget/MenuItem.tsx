@@ -17,7 +17,7 @@ export interface MenuItemProps {
 
 export const MenuItem = (props: MenuItemProps) => {
     const isActive = !props.disabled && props.activePage === props.title;
-    const hasCount = !props.disabled && !!props.count && props.count > 0;
+    const hasCount = !props.disabled && props.count != undefined && props.count > 0;
     return (
         <hstack
             padding="small"
@@ -25,7 +25,7 @@ export const MenuItem = (props: MenuItemProps) => {
             cornerRadius="medium"
             lightBackgroundColor={isActive ? 'AlienBlue-100' : (hasCount ? 'Yellow-50' : 'PureGray-50')}
             lightBorderColor={isActive ? 'AlienBlue-700' : (hasCount ? 'Yellow-300' : 'PureGray-300')}
-            darkBackgroundColor={isActive ? 'AlienBlue-800' : (hasCount ? 'Yellow-800' : 'PureGray-800')}
+            darkBackgroundColor={isActive ? 'AlienBlue-800' : (hasCount ? 'Yellow-800' : 'PureGray-900')}
             darkBorderColor={isActive ? 'AlienBlue-400' : (hasCount ? 'Yellow-600' : 'PureGray-600')}
             width="33%"
             alignment="middle center"
@@ -40,7 +40,7 @@ export const MenuItem = (props: MenuItemProps) => {
                 {props.title}
             </text>
             <spacer size="xsmall"/>
-            <text size="small">({hasCount ? props.count ?? 0 : '--'})</text>
+            <text size="small">({!props.disabled && props.count != undefined  ? props.count : '--'})</text>
         </hstack>
     );
 };

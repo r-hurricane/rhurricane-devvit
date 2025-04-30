@@ -6,11 +6,11 @@
  */
 
 import {Devvit} from '@devvit/public-api';
-import {AppSettings} from "./devvit/AppSettings.js";
-import {JobController} from "./devvit/jobs/JobController.js";
-import {AppUpgradeTrigger} from "./devvit/triggers/AppUpgradeTrigger.js";
-import {MenuRegistrar} from "./devvit/menu-items/MenuRegistrar.js";
-import {registerCustomPostType} from "./blocks/CustomPostType.js";
+import {AppSettings} from "./AppSettings.js";
+import {JobController} from "./jobs/JobController.js";
+import {AppUpgradeTrigger} from "./triggers/AppUpgradeTrigger.js";
+import {MenuRegistrar} from "./menu-items/MenuRegistrar.js";
+import {registerCustomPostType} from "../blocks/CustomPostType.js";
 
 Devvit.configure({
   http: true,

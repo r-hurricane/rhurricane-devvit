@@ -7,6 +7,9 @@
 
 import {Context, Devvit, useState} from "@devvit/public-api";
 import {AtcfData} from "../../../../shared/dtos/redis/summary-api/SummaryApiAtcfDtos.js";
+import {NoDetails} from "../common/NoDetails.js";
+import {Container} from "../common/Container.js";
+import {formatDate} from "../../../../shared/render/formatDate.js";
 
 // Helper method to get the hurricane category from wind strength
 const windCategory = (susWind: number | null): string | null => {
@@ -69,9 +72,6 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
         : `${c.basin} ${c.level} ${c.name}`
     }${p(' - ', windCat != 'TD' ? windCat : null)}`;
 
-    // For now, hard code the scheme to gray. Might have the category level dictate the color in the future.
-    const colorScheme = 'PureGray';
-
     // Force values for position, so toFixed can easily be called.
     const lat = c.lat ?? 0;
     const lon = c.lon ?? 0;
@@ -82,15 +82,7 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
     return (
         <vstack>
             <spacer size="xsmall" />
-            <vstack
-                padding="small"
-                border="thin"
-                cornerRadius="small"
-                lightBackgroundColor={colorScheme+'-100'}
-                darkBackgroundColor={colorScheme+'-800'}
-                lightBorderColor={colorScheme+'-300'}
-                darkBorderColor={colorScheme+'-600'}
-            >
+            <Container>
                 {/* In the case there are multiple storms, allow the storm name to be tapped to collapse and allow other storm details to be visible. */}
                 <hstack onPress={setActiveStorm !== undefined ? () => setActiveStorm(props.activeStorm === id ? '' : id) : undefined}>
                     <text style="heading">{name}</text>
@@ -115,32 +107,14 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
                         ) : null}
                     </vstack>
                 )}
-            </vstack>
+            </Container>
         </vstack>
     );
 };
-
-// Component for displaying no active storms
-const AtcfNone = () => {
-    return (
-        <vstack
-            height="200px"
-            alignment="middle center"
-            border="thin"
-            cornerRadius="medium"
-            lightBackgroundColor="PureGray-100"
-            darkBackgroundColor="PureGray-800"
-            lightBorderColor="PureGray-300"
-            darkBorderColor="PureGray-600"
-        >
-            <text size="xlarge" width="100%" wrap alignment="middle center">No storms currently being tracked.</text>
-        </vstack>
-    );
-};
-
 
 interface AtcfPageProps {
     context: Context;
+    lastModified: number | null | undefined;
     atcf: AtcfData[] | undefined;
 }
 
@@ -153,24 +127,9 @@ export const AtcfPage = (props: AtcfPageProps) => {
         return (
             <vstack>
                 <spacer size="medium" />
-                <vstack
-                    padding="small"
-                    border="thin"
-                    lightBackgroundColor="PureGray-100"
-                    darkBackgroundColor="PureGray-800"
-                    lightBorderColor="PureGray-300"
-                    darkBorderColor="PureGray-600"
-                    alignment="center middle"
-                    cornerRadius="medium"
-                >
-                    <text
-                        weight="bold"
-                        size="large"
-                        wrap
-                    >
-                        Failed to load Automatic Tropical Cyclone Forecast. Try again later.
-                    </text>
-                </vstack>
+                <NoDetails>
+                    Failed to load Automatic Tropical Cyclone Forecast. Try again later.
+                </NoDetails>
             </vstack>
         );
     }
@@ -193,22 +152,22 @@ export const AtcfPage = (props: AtcfPageProps) => {
     return (
         <vstack>
             <spacer size="medium" />
-            <vstack
-                padding="small"
-                border="thin"
-                alignment="center middle"
-                cornerRadius="medium"
-                lightBackgroundColor="PureGray-100"
-                darkBackgroundColor="PureGray-800"
-                lightBorderColor="PureGray-300"
-                darkBorderColor="PureGray-600"
-            >
-                <text weight="bold" size="large">{widgetWidth < 500 ? 'Auto Trop Cyclone Forecast (ATCF)' : 'Automatic Tropical Cyclone Forecast (ATCF)'}</text>
+            <Container alignment="middle center">
+                <text weight="bold" size="large">
+                    {widgetWidth < 500 ?
+                        'Auto Trop Cyclone Forecast (ATCF)' :
+                        'Automatic Tropical Cyclone Forecast (ATCF)'
+                    }
+                </text>
+                <text size="small">{formatDate(props.lastModified)}</text>
                 {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
-            </vstack>
+            </Container>
             <spacer size="medium" />
-            {atcfStorms && atcfStorms.length > 0 ? atcfStorms : <AtcfNone />}
+            {atcfStorms && atcfStorms.length > 0
+                ? atcfStorms
+                : <NoDetails height="200px">No storms currently being tracked.</NoDetails>
+            }
         </vstack>
     );
 };

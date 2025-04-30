@@ -8,6 +8,9 @@
 import {Devvit, Context} from "@devvit/public-api";
 import {TwoAreaOfInterest, TwoData} from "../../../../shared/dtos/redis/summary-api/SummaryApiTwoDtos.js";
 import SizeString = Devvit.Blocks.SizeString;
+import {NoDetails} from "../common/NoDetails.js";
+import {Container} from "../common/Container.js";
+import {formatDate} from "../../../../shared/render/formatDate.js";
 
 // Helper function to get the color scheme for the header and area of interest (AOI) color
 const chanceColorScheme = (chance: number) => {
@@ -73,20 +76,7 @@ const NoActivityExpected = () => {
     return (
         <vstack>
             <spacer size="xsmall" />
-            <hstack
-                height="100px"
-                alignment="middle center"
-                padding="small"
-                border="thin"
-                cornerRadius="small"
-                lightBackgroundColor="PureGray-100"
-                backgroundColor="PureGray-800"
-                lightBorderColor="PureGray-300"
-                darkBorderColor="PureGray-600"
-                gap="small"
-            >
-                <text size="xlarge" width="100%" wrap alignment="middle center">No activity expected in the next 7 days.</text>
-            </hstack>
+            <NoDetails>No activity expected in the next 7 days.</NoDetails>
         </vstack>
     );
 };
@@ -106,24 +96,7 @@ export const TwoPage = (props: TwoPageProps) => {
         return (
             <vstack>
                 <spacer size="medium" />
-                <vstack
-                    padding="small"
-                    border="thin"
-                    lightBackgroundColor="PureGray-100"
-                    darkBackgroundColor="PureGray-800"
-                    lightBorderColor="PureGray-300"
-                    darkBorderColor="PureGray-600"
-                    alignment="center middle"
-                    cornerRadius="medium"
-                >
-                    <text
-                        weight="bold"
-                        size="large"
-                        wrap
-                    >
-                        Failed to load Tropical Weather Outlook. Try again later.
-                    </text>
-                </vstack>
+                <NoDetails weight="bold">Failed to load Tropical Weather Outlook. Try again later.</NoDetails>
             </vstack>
         );
     }
@@ -143,36 +116,21 @@ export const TwoPage = (props: TwoPageProps) => {
         ? two.pacific.areas.map(s => (<AreaOfInterest widgetWidth={widgetWidth} storm={s} />))
         : (<NoActivityExpected />);
 
-    // Helper to render TWO heading date
-    const renderDate = (time: number | undefined | null): string => {
-        if (!time) return 'Unknown';
-        const date = new Date(time);
-        if (!date || isNaN(date.getTime())) return 'Unknown';
-        return `${date.getUTCFullYear()}-${(date.getUTCMonth()+1).toString().padStart(2, '0')}-${date.getUTCDate().toString().padStart(2, '0')} ${date.getUTCHours().toString().padStart(2, '0')}z`;
-    }
-
     return (
         <vstack>
             <spacer size="medium" />
-            <vstack
-                padding="small"
-                border="thin"
-                lightBackgroundColor={titleColor+'-50'}
-                darkBackgroundColor={titleColor+'-900'}
-                lightBorderColor={titleColor+'-300'}
-                darkBorderColor={titleColor+'-600'}
-                alignment="center middle"
-                cornerRadius="medium"
-            >
-                <text
-                    weight="bold"
-                    size="large"
-                >
-                    {widgetWidth < 500 ? 'Outlook (TWO)' : 'Tropical Weather Outlook (TWO)'} - {renderDate(two.atlantic.issuedOn?.time) ?? ''}
+            <Container alignment="middle center">
+                <text weight="bold" size="large">
+                    {
+                        widgetWidth < 500
+                            ? 'Tropical Outlook (TWO)'
+                            : 'Tropical Weather Outlook (TWO)'
+                    }
                 </text>
+                <text size="small">{formatDate(two.atlantic.issuedOn?.time)}</text>
                 {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
-            </vstack>
+            </Container>
             <spacer size="medium" />
             <hstack>
                 <text weight="bold" size="xlarge">Atlantic</text>

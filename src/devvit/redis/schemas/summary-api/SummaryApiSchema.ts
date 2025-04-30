@@ -15,7 +15,7 @@ import {SummaryApiAtcfSchema} from "./SummaryApiAtcfSchemas.js";
 const SummaryApiDataSchema = <T extends z.ZodTypeAny>(dataSchema: T) => {
     return z.object({
         data: dataSchema,
-        lastModified: z.number(),
+        lastModified: z.number().nullable(),
         count: z.number()
     }).strict();
 };

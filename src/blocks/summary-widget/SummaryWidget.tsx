@@ -75,8 +75,8 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                 </hstack>
                 {!loaded && <LoadingOrError error={!!error} message='Loading Tropical Weather Outlook...' />}
                 {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={twoData?.two?.data} />}
-                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} atcf={twoData?.atcf?.data} />}
-                {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} tcpod={twoData?.tcpod?.data} />}
+                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} lastModified={twoData?.atcf?.lastModified} atcf={twoData?.atcf?.data} />}
+                {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} lastModified={twoData?.tcpod.lastModified} tcpod={twoData?.tcpod?.data} />}
             </vstack>
             <vstack width="100%" height="100%" alignment="bottom start">
                 <vstack
@@ -97,7 +97,9 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                     <text style="heading" size="xlarge">Data Disclaimer</text>
                     <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white" />
                     <text size="xlarge" weight="bold" color="danger-plain" wrap>This app is is NOT an official government app and therefore should not be used for any decisions pertaining to your safety or security!</text>
-                    <text wrap>Please visit the Official National Hurricane Center (NHC) (https://nhc.noaa.gov) or the Official Joint Typhoon Warning Center (JTWC) (https://www.metoc.navy.mil/ jtwc/jtwc.html) pages for official government warnings and data.</text>
+                    <text wrap>Please visit official government channels for the most accurate information and warnings:</text>
+                    <button onPress={() => { props.context.ui.navigateTo("https://nhc.noaa.gov"); }}>National Hurricane Center (NHC) (https://nhc.noaa.gov)</button>
+                    <button onPress={() => { props.context.ui.navigateTo("https://www.metoc.navy.mil/jtwc/jtwc.html"); }}>Joint Typhoon Warning Center (JTWC) (https://www.metoc.navy.mil/jtwc/jtwc.html)</button>
                     <text wrap>Data obtained from the National Hurricane Center (NHC) and National Weather Service (NWS)</text>
                     <text wrap>Developed and maintained by u/Beach-Brews</text>
                     <hstack width="100%" alignment="bottom center">
