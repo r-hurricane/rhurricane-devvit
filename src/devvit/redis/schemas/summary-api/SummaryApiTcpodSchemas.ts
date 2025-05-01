@@ -25,7 +25,8 @@ export const Nous42HeaderSchema = z
         end: WmoDateSchema.nullable(),
         tcpod: Nous42HeaderTcpodSchema.nullable(),
         correction: z.boolean().nullable(),
-        amendment: z.boolean().nullable()
+        amendment: z.boolean().nullable(),
+        remark: z.string().nullable()
 	})
 	.strict();
 

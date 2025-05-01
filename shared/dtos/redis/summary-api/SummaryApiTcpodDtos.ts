@@ -22,6 +22,7 @@ export type Nous42Header = {
     tcpod: Nous42HeaderTcpod | null;
     correction: boolean | null;
     amendment: boolean | null;
+    remark: string | null;
 }
 
 export type Nous42Outlook = {
