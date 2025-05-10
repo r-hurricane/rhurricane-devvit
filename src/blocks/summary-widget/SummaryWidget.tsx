@@ -58,7 +58,7 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
         {
             finally: (_, error) => {
                 if (error)
-                    console.error('[Summary Load] ' + error);
+                    console.error('[RHurricane Summary Load] - Error fetching summary data: ', error);
             }
         }
     );
