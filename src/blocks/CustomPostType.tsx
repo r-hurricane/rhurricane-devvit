@@ -26,7 +26,7 @@ const CustomPostType = (props: CustomPostTypeProps) => {
         {
             finally: (_, error) => {
                 if (error)
-                    console.error(error);
+                    console.error('[RHurricane Post Loader] - Error loading post metadata:', error);
             }
         }
     );

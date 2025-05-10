@@ -8,6 +8,7 @@
 import {Devvit} from "@devvit/public-api";
 import {DataUpdater} from "../jobs/DataUpdater.js";
 import {Logger} from "../Logger.js";
+import {isMod} from "../utils/userUtils.js";
 
 export class StopDataUpdaterMenuItem {
 
@@ -21,6 +22,16 @@ export class StopDataUpdaterMenuItem {
                 const logger = await Logger.Create('Menu - Stop Update', context.settings);
                 
                 try {
+                    // Check user is a mod
+                    if (!(await isMod(context))) {
+                        context.ui.showToast({
+                            text: 'This action requires moderator access.',
+                            appearance: 'neutral'
+                        });
+                        logger.info("User is not a moderator.");
+                        return;
+                    }
+
                     // Get update job instance
                     const job = DataUpdater.Instance;
                     if (!job) {

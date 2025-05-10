@@ -20,6 +20,8 @@ import {AppSettings, SettingsEnvironment} from '../AppSettings.js';
 import {Notifier} from "../notifications/Notifier.js";
 import {RedisService} from "../redis/RedisService.js";
 import {Logger} from "../Logger.js";
+import {SummaryApiSchema} from "../redis/schemas/summary-api/SummaryApiSchema.js";
+import {allowRepost, createSummaryPost, repostIfAtRepostFreq} from "../utils/summaryPostUtils.js";
 
 export class DataUpdater extends JobBase {
 
@@ -62,8 +64,11 @@ export class DataUpdater extends JobBase {
             const summaryApiUrl = `https://${environment === SettingsEnvironment.Development ? 'dev.' : ''}rhurricane.net/api/v1/`;
             logger.debug('SummaryApiUrl:', summaryApiUrl);
 
-            // Get the last modified date from Redis
+            // Get if reposting is enabled
             const redis = new RedisService(context.redis);
+            const allowReposts = await allowRepost(logger, context.settings, redis);
+
+            // Get the last modified date from Redis
             const lastModified = await redis.getSummaryApiLastModified();
             logger.debug('Redis LastModified:', lastModified);
 
@@ -86,7 +91,12 @@ export class DataUpdater extends JobBase {
                 if (lastModified && new Date(lastModified).getTime() < saleTime) {
                     logger.warn(`Stale data detected! Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
                     await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - Stale Data Detected\n\nThe data updater has detected the Summary API has become stale. Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
+                    return;
                 }
+
+                // If allowing reposts, also check if we should repost based on time
+                if (allowReposts)
+                    await repostIfAtRepostFreq(logger, context);
                 return;
             }
 
@@ -98,11 +108,17 @@ export class DataUpdater extends JobBase {
                 return;
             }
 
+            // If repost automation is enabled, we need to fetch the "old" data to know if there is a "significant" change
+            const lastSummaryApiData = allowReposts ? await redis.getSummaryApiData() : null;
+            logger.debug(lastSummaryApiData ? 'Received previous summary API data' : 'Repost disabled, or no previous summary API data to compare');
+
             // Save the API result to Redis for the summary post!
-            await redis.saveSummaryApiData(await apiResult.json());
+            const apiData = await apiResult.json();
+            const newSummaryApiData = await SummaryApiSchema.parseAsync(apiData);
+            await redis.saveSummaryApiData(apiData, false);
             logger.info('Saved new API data to Redis!');
 
-            // Finally, write back the last-modified date (from API call) to Redis once all actions are successful
+            // Write back the last-modified date (from API call) to Redis once all actions are successful
             const apiLastModified = apiResult.headers.get('Last-Modified');
             if (apiLastModified) {
                 await redis.saveSummaryApiLastModified(apiLastModified);
@@ -110,6 +126,34 @@ export class DataUpdater extends JobBase {
 
             } else {
                 logger.warn(`API did not return a last modified date!`);
+            }
+
+            // If allow reposting is OFF, complete update task
+            if (!allowReposts) {
+                logger.debug('Repost ability is disabled');
+                return;
+            }
+
+            // Repost if at frequency
+            const didRepostAtFreq = await repostIfAtRepostFreq(logger, context);
+            if (didRepostAtFreq) return;
+
+            // If there is not a previous post to compare with, skip
+            if (!lastSummaryApiData) {
+                logger.info('No data to compare with. Check will happen on next update.');
+                return;
+            }
+
+            // Determine if there are new counts in the TWO or ATCF
+            if (newSummaryApiData.two.count > lastSummaryApiData.two.count ||
+                newSummaryApiData.atcf.count > lastSummaryApiData.atcf.count
+            )
+            {
+                logger.info('New API result has a new storm in the TWO or ATCF. Reposting!');
+                // TODO: Add New Storm Flair
+                const result = await createSummaryPost(context);
+                logger.info('Reposted new post:', result.toast.text, result.post?.id);
+                return;
             }
 
         } catch (e) {

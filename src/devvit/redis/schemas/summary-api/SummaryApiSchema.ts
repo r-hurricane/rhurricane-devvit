@@ -20,6 +20,8 @@ const SummaryApiDataSchema = <T extends z.ZodTypeAny>(dataSchema: T) => {
     }).strict();
 };
 
+export type SummaryApiSchemaType = z.infer<typeof SummaryApiAtcfSchema>;
+
 export const SummaryApiSchema = z
     .object({
         two: SummaryApiDataSchema(SummaryApiTwoSchema),
