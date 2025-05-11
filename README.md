@@ -40,10 +40,14 @@ There are a few different settings to help control aspects of the app:
    Default: 1 min
 3. Data API Stale Time (hr) - When to consider the summary API data to be outdated and not displayed
    Default: 12 hours
-4. Log Level - Controls the level of logging by the app. Default: Warn
-5. Discord Notification URL - (Optional) A Discord channel webhook URL to send alerts to. Must be a
+4. Enable Post Automation - Whether to allow the app to automatically create a post. Either when 
+   there are significant changes, or (if enabled below) periodically when there are no new changes.
+5. Repost Freq (hr) - How frequently to repost if no significant changes. Must be Six (6) or
+   greater. Zero (0) disables this feature.',
+6. Log Level - Controls the level of logging by the app. Default: Warn
+7. Discord Notification URL - (Optional) A Discord channel webhook URL to send alerts to. Must be a
    Discord webhook URL
-6. Notification Silence (min) - How long to silence the same notification sent to Discord.
+8. Notification Silence (min) - How long to silence the same notification sent to Discord.
    Default: 30
 
 ## Menu Items
@@ -51,13 +55,13 @@ This app has a few different menu items to control the data update scheduled job
 interactive post types.
 
 * **Subreddit Menu > RHurricane - Start Data Updater**  
-This menu allows you to start the data updater scheduled job, which starts various update processes.
+This menu allows mods to start the data updater scheduled job, which starts various update processes.
 
 * **Subreddit Menu > RHurricane - Stop Data Updater**  
-This menu allows you to stop the data updater scheduled job.
+This menu allows mods to stop the data updater scheduled job.
 
 * **Subreddit Menu > RHurricane - Create Summary Post**  
-Creates a new Tropical Weather Outlook (TWO) Interactive Post.
+Allows mods to create a new Tropical Weather Outlook (TWO) Interactive Post.
 
 ## Future Plans
 There are a number of plans for enhancing and adding to this app as the hurricane season progresses:
@@ -74,3 +78,7 @@ There are a number of plans for enhancing and adding to this app as the hurrican
   * Would be awesome to analyse image posts for rule-breaking images (i.e. no clear 
     date/coordinates, known common troll posts, etc.)
   * Other various mod pain-points, specific to r/Hurricane (if any)
+
+## Change Log
+* 0.1.0 - Initial BETA release
+* 0.1.1 - Basic post automation + bugfix for menu items

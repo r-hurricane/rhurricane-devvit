@@ -10,6 +10,8 @@ import {DataUpdater} from "../jobs/DataUpdater.js";
 import {RedisService} from "../redis/RedisService.js";
 import {AppSettings} from "../AppSettings.js";
 import {Logger} from "../Logger.js";
+import {isMod} from "../utils/userUtils.js";
+import {createSummaryPost} from "../utils/summaryPostUtils.js";
 
 export class CreateSummaryPostMenuItem {
 
@@ -23,13 +25,13 @@ export class CreateSummaryPostMenuItem {
                 const logger = await Logger.Create('Menu - Create Summary', context.settings);
                 
                 try {
-                    // Check the subredditName is not missing, as it is required for SubmitPost to work!
-                    if (!context.subredditName) {
-                        logger.error('Context was missing Subreddit Name?!?');
+                    // Check user is a mod
+                    if (!(await isMod(context))) {
                         context.ui.showToast({
-                            text: 'ERROR: Context was missing the Subreddit Name? Shouldn\' happen...',
+                            text: 'This action requires moderator access.',
                             appearance: 'neutral'
                         });
+                        logger.info("User is not a moderator.");
                         return;
                     }
 
@@ -62,44 +64,10 @@ export class CreateSummaryPostMenuItem {
                     }
 
                     // Submit the new post
-                    const post = await context.reddit.submitPost({
-                        title: 'Tropical Weather Summary',
-                        subredditName: context.subredditName,
-                        textFallback: {
-                            text: 'Interactive posts are unsupported on old.reddit or older app versions.'
-                        },
-                        preview: (
-                            <zstack width="100%" height="100%" alignment="center middle">
-                                <vstack width="100%" height="100%" alignment="center middle">
-                                    <image
-                                        url="loading.gif"
-                                        description="Loading ..."
-                                        height="170px"
-                                        width="170px"
-                                        imageHeight="170px"
-                                        imageWidth="170px"
-                                    />
-                                    <spacer size="small" />
-                                    <text size="large" weight="bold">
-                                        Loading...
-                                    </text>
-                                </vstack>
-                            </zstack>
-                        )
-                    });
-                    logger.info(`Successfully created post: ${post.id}`);
-
-                    // Save post type to redis
-                    await redis.savePostMetadata(post.id, { type: 'summary' });
-
-                    // Show success message
-                    context.ui.showToast({
-                        text: 'Successfully created Summary Post!',
-                        appearance: 'success'
-                    });
-
-                    // Redirect to new post!
-                    context.ui.navigateTo(post);
+                    const result = await createSummaryPost(context);
+                    context.ui.showToast(result.toast);
+                    if (result.post)
+                        context.ui.navigateTo(result.post);
 
                 } catch (ex) {
                     logger.error('Error creating the summary post:', ex);

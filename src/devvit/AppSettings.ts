@@ -34,6 +34,12 @@ enum SettingKeys {
     // How many hours before considering summary data to be stale
     SummaryStaleHours = 'summary-stale-hours',
 
+    // Whether to repost when there are new significant TWO or Storm Advisories issued
+    AutomatePosts = 'automate-posts',
+
+    // How frequently to repost (when no changed activity)
+    AutomateRepostFrequency = 'automate-repost-freq',
+
     // Logging level
     LogLevel = 'log-level',
 
@@ -62,6 +68,16 @@ export class AppSettings {
     // Gets the configured number of hours before considering the API data to be stale and inaccurate
     public static async GetStaleHours(settings: SettingsClient): Promise<number> {
         return await settings.get<number>(SettingKeys.SummaryStaleHours) ?? 12;
+    }
+
+    // Gets whether posts should be automatically posted by the system
+    public static async GetAutomatePosts(settings: SettingsClient): Promise<boolean> {
+        return await settings.get<boolean>(SettingKeys.AutomatePosts) ?? false;
+    }
+
+    // Gets the frequency to automatically repost if there are no significant updates.
+    public static async GetAutomateRepostFrequency(settings: SettingsClient): Promise<number> {
+        return await settings.get<number>(SettingKeys.AutomateRepostFrequency) ?? 0;
     }
 
     // Gets the configured log level to reduce the amount of logs
@@ -126,6 +142,28 @@ export class AppSettings {
                 onValidate: event => {
                     if (event.value! < 1)
                         return 'Value must be at least 1';
+                }
+            },
+            {
+                type: 'boolean',
+                name: SettingKeys.AutomatePosts,
+                label: 'Enable Post Automation',
+                helpText: 'Whether to allow the app to automatically create a post. Either when there are significant changes, or (if enabled below) periodically when there are no new changes.',
+                defaultValue: false,
+                scope: SettingScope.Installation
+            },
+            {
+                type: 'number',
+                name: SettingKeys.AutomateRepostFrequency,
+                label: 'Repost Freq (hr)',
+                helpText: 'How frequently to repost if no significant changes. Must be Six (6) or greater. Zero (0) disables this feature.',
+                defaultValue: 0,
+                scope: SettingScope.Installation,
+                onValidate: event => {
+                    if (event.value! < 0)
+                        return 'Value must be a positive number.';
+                    if (event.value! > 0 && event.value! < 6)
+                        return 'Value must be 0 or at least 6.';
                 }
             },
             {

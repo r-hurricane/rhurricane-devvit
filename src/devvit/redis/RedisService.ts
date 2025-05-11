@@ -20,6 +20,7 @@ export class RedisService {
         postMetadata: (params: string) => `rhurricane:postmeta:${params[0]}`,
         summaryApiLastModified: () => `rhurricane:summaryapi:last_modified`,
         summaryApiData: () => `rhurricane:summaryapi:data`,
+        summaryApiLastRepost: () => `rhurricane:summaryapi:last_repost`,
         lastNotification: () => `rhurricane:notify:last`
     };
 
@@ -70,9 +71,24 @@ export class RedisService {
         return parsedJson satisfies SummaryApiDto;
     }
 
-    public async saveSummaryApiData(summaryApiData: any): Promise<string> {
-        await SummaryApiSchema.parseAsync(summaryApiData);
+    public async saveSummaryApiData(summaryApiData: any, checkSchema: boolean = true): Promise<string> {
+        // TODO: Is there a type checking way to parse if a summary was not already given?
+        if (checkSchema)
+            await SummaryApiSchema.parseAsync(summaryApiData);
         return await this.#redis.set(this.#redisKeys.summaryApiData(), JSON.stringify(summaryApiData));
+    }
+
+    /* ================================= */
+    /* ===== Last Repost Date/Time ===== */
+    /* ================================= */
+    public async getSummaryApiLastReposted(): Promise<number | undefined> {
+        const strVal = await this.#redis.get(this.#redisKeys.summaryApiLastRepost());
+        const intVal = strVal ? parseInt(strVal) : undefined;
+        return intVal !== undefined && !isNaN(intVal) ? intVal : undefined;
+    }
+
+    public async saveSummaryApiLastReposted(lastReposted: number): Promise<void> {
+        await this.#redis.set(this.#redisKeys.summaryApiLastRepost(), JSON.stringify(lastReposted));
     }
 
     /* =================================== */
