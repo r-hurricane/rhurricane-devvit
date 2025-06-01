@@ -14,6 +14,7 @@ export class StopDataUpdaterMenuItem {
 
     public static Register() {
         Devvit.addMenuItem({
+            forUserType: ['moderator'],
             label: 'RHurricane - Stop Data Updater',
             location: 'subreddit',
             onPress: async (_, context) => {

@@ -224,8 +224,8 @@ export const TcpodPage = (props: TcpodPageProps) => {
                 </text>
                 <text size="small">
                     {
-                        formatDate(props.tcpod?.today?.message?.header?.issued?.time
-                            ?? props.tcpod?.tomorrow?.message?.header?.issued?.time
+                        formatDate(props.tcpod?.tomorrow?.message?.header?.issued?.time
+                            ?? props.tcpod?.today?.message?.header?.issued?.time
                             ?? props.lastModified)
                     }
                 </text>

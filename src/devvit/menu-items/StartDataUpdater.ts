@@ -14,6 +14,7 @@ export class StartDataUpdaterMenuItem {
 
     public static Register() {
         Devvit.addMenuItem({
+            forUserType: ['moderator'],
             label: 'RHurricane - Start Data Updater',
             location: 'subreddit',
             onPress: async (_, context) => {
