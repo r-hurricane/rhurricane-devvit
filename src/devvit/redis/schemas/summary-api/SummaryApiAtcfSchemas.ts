@@ -15,23 +15,20 @@ export const AtcfRadSchema = z
         se: z.number().nullable(),
         sw: z.number().nullable(),
         nw: z.number().nullable()
-	})
-	.strict();
+	});
 
 export const AtcfStormCodeSchema = z
 	.object({
         ba: z.string().nullable(),
         id: z.string().nullable(),
         yr: z.string().nullable()
-	})
-	.strict();
+	});
 
 export const AtcfFromToSchema = z
 	.object({
         from: AtcfStormCodeSchema,
         to: AtcfStormCodeSchema
-	})
-	.strict();
+	});
 
 export const AtcfDataSchema = z
 	.object({
@@ -66,8 +63,7 @@ export const AtcfDataSchema = z
         invest: AtcfFromToSchema.nullable(),
         trans: AtcfFromToSchema.nullable(),
         diss: AtcfFromToSchema.nullable()
-	})
-	.strict();
+	});
 
 export const SummaryApiAtcfSchema = z
 	.object({
@@ -76,5 +72,4 @@ export const SummaryApiAtcfSchema = z
         invest: AtcfFromToSchema.nullable(),
         trans: AtcfFromToSchema.nullable(),
         diss: AtcfFromToSchema.nullable()
-	})
-	.strict();
+	});

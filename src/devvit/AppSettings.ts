@@ -40,6 +40,9 @@ enum SettingKeys {
     // How frequently to repost (when no changed activity)
     AutomateRepostFrequency = 'automate-repost-freq',
 
+    // Whether in maintenance mode or not
+    MaintenanceMode = 'maintenance-mode',
+
     // Logging level
     LogLevel = 'log-level',
 
@@ -78,6 +81,11 @@ export class AppSettings {
     // Gets the frequency to automatically repost if there are no significant updates.
     public static async GetAutomateRepostFrequency(settings: SettingsClient): Promise<number> {
         return await settings.get<number>(SettingKeys.AutomateRepostFrequency) ?? 0;
+    }
+
+    // Gets whether maintenance mode is enabled or not.
+    public static async GetMaintenanceMode(settings: SettingsClient): Promise<boolean> {
+        return await settings.get<boolean>(SettingKeys.MaintenanceMode) ?? false;
     }
 
     // Gets the configured log level to reduce the amount of logs
@@ -165,6 +173,14 @@ export class AppSettings {
                     if (event.value! > 0 && event.value! < 6)
                         return 'Value must be 0 or at least 6.';
                 }
+            },
+            {
+                type: 'boolean',
+                name: SettingKeys.MaintenanceMode,
+                label: 'Maintenance Mode',
+                helpText: 'Whether to enable or disable maintenance mode',
+                defaultValue: false,
+                scope: SettingScope.Installation
             },
             {
                 type: 'select',

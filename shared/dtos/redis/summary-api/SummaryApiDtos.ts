@@ -29,7 +29,20 @@ export type SummaryApiData<TData> = {
     count: number;
 }
 
+export type SummaryMessage = {
+    text: string,
+    start: number,
+    end: number,
+    lightBgColor?: string | undefined,
+    darkBgColor?: string | undefined,
+    lightColor?: string | undefined,
+    darkColor?: string | undefined,
+    lightBrColor?: string | undefined,
+    darkBrColor?: string | undefined
+}
+
 export type SummaryApiDto = {
+    message?: SummaryMessage | null | undefined,
     two: SummaryApiData<TwoData>;
     atcf: SummaryApiData<AtcfData[]>;
     tcpod: SummaryApiData<TcpodData>;

@@ -20,7 +20,7 @@ export const NoDetails = (props: NoDetailsProps) => {
     containerProps.alignment = containerProps.alignment ?? "middle center";
     return (
         <Container {...containerProps}>
-            <text size={size ?? "xlarge"} weight={weight} wrap>{children}</text>
+            <text size={size ?? "large"} weight={weight} wrap>{children}</text>
         </Container>
     );
 };

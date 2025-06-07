@@ -48,20 +48,20 @@ const AreaOfInterest = (props: TwoStormProps) => {
         <vstack>
             <spacer size="xsmall" />
             <hstack
-                padding="small"
+                padding="xsmall"
                 border="thin"
                 cornerRadius="small"
                 lightBackgroundColor={colorScheme+'-50'}
                 darkBackgroundColor={colorScheme+'-900'}
                 lightBorderColor={colorScheme+'-300'}
                 darkBorderColor={colorScheme+'-600'}
-                gap="small"
             >
                 {chanceImage(maxChance)}
                 <text width="35px" alignment="middle center">{props.storm.twoDay?.chance ?? 0}%</text>
                 <text>|</text>
                 <text width="35px" alignment="middle center">{props.storm.sevenDay?.chance ?? 0}%</text>
                 <text>|</text>
+                <spacer size="xsmall" />
                 <text width={(props.widgetWidth-135)+'px' as SizeString} overflow="ellipsis">
                     {!!props.storm.id && props.storm.id.length > 0 ? props.storm.id + ' - ' : ''}
                     {props.storm.title}
@@ -76,7 +76,7 @@ const NoActivityExpected = () => {
     return (
         <vstack>
             <spacer size="xsmall" />
-            <NoDetails>No activity expected in the next 7 days.</NoDetails>
+            <NoDetails>No formation expected in the next 7 days.</NoDetails>
         </vstack>
     );
 };
@@ -95,7 +95,7 @@ export const TwoPage = (props: TwoPageProps) => {
     if (!props.two) {
         return (
             <vstack>
-                <spacer size="medium" />
+                <spacer size="small" />
                 <NoDetails weight="bold">Failed to load Tropical Weather Outlook. Try again later.</NoDetails>
             </vstack>
         );
@@ -117,10 +117,9 @@ export const TwoPage = (props: TwoPageProps) => {
         : (<NoActivityExpected />);
 
     return (
-        <vstack>
-            <spacer size="medium" />
+        <vstack width="100%">
             <Container alignment="middle center">
-                <text weight="bold" size="large">
+                <text weight="bold" size="medium">
                     {
                         widgetWidth < 500
                             ? 'Tropical Outlook (TWO)'
@@ -131,14 +130,14 @@ export const TwoPage = (props: TwoPageProps) => {
                 {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
             </Container>
-            <spacer size="medium" />
+            <spacer size="small" />
             <hstack>
-                <text weight="bold" size="xlarge">Atlantic</text>
+                <text weight="bold" size="medium">Atlantic</text>
             </hstack>
             {atlanticSummary}
-            <spacer size="medium" />
+            <spacer size="small" />
             <hstack>
-                <text weight="bold" size="xlarge">Pacific</text>
+                <text weight="bold" size="medium">Pacific</text>
             </hstack>
             {pacificSummary}
         </vstack>

@@ -9,8 +9,8 @@ import {Devvit} from "@devvit/public-api";
 
 export interface LoadingOrErrorProps {
     message?: string;
-    error?: boolean;
-    errorMessage?: string;
+    error?: boolean | undefined;
+    errorMessage?: string | undefined;
 }
 
 export const LoadingOrError = (props: LoadingOrErrorProps) => {
@@ -29,7 +29,7 @@ export const LoadingOrError = (props: LoadingOrErrorProps) => {
                 <text size="large" weight="bold" alignment="top center" wrap>
                     {!props.error && !props.errorMessage
                         ? (props.message ?? 'Loading...')
-                        : (props.errorMessage ?? 'Sorry, there was an error loading... Please try again later.')
+                        : (props.errorMessage ?? 'Sorry, there was an error loading... Please check back soon!')
                     }
                 </text>
             </vstack>

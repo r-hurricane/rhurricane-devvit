@@ -80,16 +80,16 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
     const setActiveStorm = props.setActiveStorm;
 
     return (
-        <vstack>
-            <spacer size="xsmall" />
-            <Container>
+        <vstack width="100%">
+            <spacer size="small" />
+            <Container onPress={setActiveStorm !== undefined ? () => setActiveStorm(props.activeStorm === id ? '' : id) : undefined}>
                 {/* In the case there are multiple storms, allow the storm name to be tapped to collapse and allow other storm details to be visible. */}
-                <hstack onPress={setActiveStorm !== undefined ? () => setActiveStorm(props.activeStorm === id ? '' : id) : undefined}>
+                <hstack>
                     <text style="heading">{name}</text>
                 </hstack>
                 {/* Only render the storm details if chosen as the active storm. */}
                 {id === props.activeStorm && (
-                    <vstack>
+                    <vstack width="100%">
                         <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white" />
                         <spacer size="small" />
                         {pRow(c.date, 'Updated', getDate(c.date))}
@@ -150,10 +150,9 @@ export const AtcfPage = (props: AtcfPageProps) => {
     );
 
     return (
-        <vstack>
-            <spacer size="medium" />
+        <vstack width="100%">
             <Container alignment="middle center">
-                <text weight="bold" size="large">
+                <text weight="bold" size="medium">
                     {widgetWidth < 500 ?
                         'Auto Trop Cyclone Forecast (ATCF)' :
                         'Automatic Tropical Cyclone Forecast (ATCF)'
@@ -163,7 +162,6 @@ export const AtcfPage = (props: AtcfPageProps) => {
                 {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
             </Container>
-            <spacer size="medium" />
             {atcfStorms && atcfStorms.length > 0
                 ? atcfStorms
                 : <NoDetails height="200px">No storms currently being tracked.</NoDetails>

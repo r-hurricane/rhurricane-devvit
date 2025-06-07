@@ -9,7 +9,7 @@
  * License: BSD-3-Clause
  */
 
-import {Context, Devvit, useAsync, useState} from "@devvit/public-api";
+import {Context, Devvit, BlockElement, useAsync, useState} from "@devvit/public-api";
 import {MenuItem} from './MenuItem.js';
 import {TwoPage} from "./two/TwoPage.js";
 import {AtcfPage} from "./atcf/AtcfPage.js";
@@ -63,20 +63,64 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
         }
     );
     const loaded = !loading && !error;
-    const twoData: SummaryApiDto | null = data?.summaryApiData ?? null;
+    const apiData: SummaryApiDto | null = data?.summaryApiData ?? null;
+
+    const now = new Date().getTime();
+    const announcement = apiData && !!apiData.message && apiData.message.start <= now && apiData.message.end >= now
+        ? (
+            <vstack
+                padding="xsmall"
+                border="thin"
+                alignment="center middle"
+                cornerRadius="medium"
+                lightBackgroundColor={apiData.message.lightBgColor ?? "Yellow-100"}
+                darkBackgroundColor={apiData.message.darkBgColor ?? "Yellow-800"}
+                lightBorderColor={apiData.message.lightColor ?? "Yellow-300"}
+                darkBorderColor={apiData.message.darkColor ?? "Yellow-600"}
+            >
+                <text
+                    alignment="center middle"
+                    size="small"
+                    lightColor={apiData.message.lightColor ?? "Global-Black"}
+                    darkColor={apiData.message.darkColor ?? "Global-White"}
+                    wrap
+                >{apiData.message.text}</text>
+            </vstack>
+        )
+        : undefined;
 
     return (
         <zstack width="100%" height="100%">
-            <vstack padding="small" width="100%" height="100%" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+            <vstack padding="small" width="100%" height="100%" gap="small" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+                {apiData && !!apiData.message && apiData.message.start <= now && apiData.message.end >= now && (
+                    <vstack
+                        padding="xsmall"
+                        border="thin"
+                        alignment="center middle"
+                        cornerRadius="medium"
+                        lightBackgroundColor={apiData.message.lightBgColor ?? "Yellow-100"}
+                        darkBackgroundColor={apiData.message.darkBgColor ?? "Yellow-800"}
+                        lightBorderColor={apiData.message.lightColor ?? "Yellow-300"}
+                        darkBorderColor={apiData.message.darkColor ?? "Yellow-600"}
+                    >
+                        <text
+                            alignment="center middle"
+                            size="small"
+                            lightColor={apiData.message.lightColor ?? "Global-Black"}
+                            darkColor={apiData.message.darkColor ?? "Global-White"}
+                            wrap
+                        >{apiData.message.text}</text>
+                    </vstack>
+                )}
                 <hstack gap="small">
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.two?.count} title="TWO" />
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.atcf?.count} title="ATCF" />
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.tcpod?.count} title="TCPOD" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.two?.count} title="TWO" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.atcf?.count} title="ATCF" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.tcpod?.count} title="TCPOD" />
                 </hstack>
                 {!loaded && <LoadingOrError error={!!error} message='Loading Tropical Weather Outlook...' />}
-                {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={twoData?.two?.data} />}
-                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} lastModified={twoData?.atcf?.lastModified} atcf={twoData?.atcf?.data} />}
-                {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} lastModified={twoData?.tcpod.lastModified} tcpod={twoData?.tcpod?.data} />}
+                {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={apiData?.two?.data} />}
+                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} lastModified={apiData?.atcf?.lastModified} atcf={apiData?.atcf?.data} />}
+                {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} lastModified={apiData?.tcpod.lastModified} tcpod={apiData?.tcpod?.data} />}
             </vstack>
             <vstack width="100%" height="100%" alignment="bottom start">
                 <vstack

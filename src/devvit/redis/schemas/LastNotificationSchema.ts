@@ -13,5 +13,4 @@ export const LastNotificationSchema = z
     .object({
         text: z.string(),
         time: z.number()
-    })
-    .strict();
+    });
