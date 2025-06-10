@@ -17,11 +17,7 @@ const SummaryMessageSchema = z
         text: z.string(),
         start: z.number(),
         end: z.number(),
-        lightBgColor: z.string().optional(),
-        lightColor: z.string().optional(),
-        darkColor: z.string().optional(),
-        lightBrColor: z.string().optional(),
-        darkBrColor: z.string().optional()
+        colorScheme: z.string().optional()
     });
 
 const SummaryApiDataSchema = <T extends z.ZodTypeAny>(dataSchema: T) => {

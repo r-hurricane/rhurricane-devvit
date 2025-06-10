@@ -18,6 +18,7 @@ import {RedisService} from "../../devvit/redis/RedisService.js";
 import {LoadingOrError} from "../LoadingOrError.js";
 import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
 import {AppSettings, SettingsEnvironment} from "../../devvit/AppSettings.js";
+import {Container} from "./common/Container.js";
 
 export interface SummaryWidgetProps {
     context: Context;
@@ -66,28 +67,7 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
     const apiData: SummaryApiDto | null = data?.summaryApiData ?? null;
 
     const now = new Date().getTime();
-    const announcement = apiData && !!apiData.message && apiData.message.start <= now && apiData.message.end >= now
-        ? (
-            <vstack
-                padding="xsmall"
-                border="thin"
-                alignment="center middle"
-                cornerRadius="medium"
-                lightBackgroundColor={apiData.message.lightBgColor ?? "Yellow-100"}
-                darkBackgroundColor={apiData.message.darkBgColor ?? "Yellow-800"}
-                lightBorderColor={apiData.message.lightColor ?? "Yellow-300"}
-                darkBorderColor={apiData.message.darkColor ?? "Yellow-600"}
-            >
-                <text
-                    alignment="center middle"
-                    size="small"
-                    lightColor={apiData.message.lightColor ?? "Global-Black"}
-                    darkColor={apiData.message.darkColor ?? "Global-White"}
-                    wrap
-                >{apiData.message.text}</text>
-            </vstack>
-        )
-        : undefined;
+    const colorScheme = apiData?.message?.colorScheme ?? 'Yellow';
 
     return (
         <zstack width="100%" height="100%">
@@ -98,20 +78,56 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                         border="thin"
                         alignment="center middle"
                         cornerRadius="medium"
-                        lightBackgroundColor={apiData.message.lightBgColor ?? "Yellow-100"}
-                        darkBackgroundColor={apiData.message.darkBgColor ?? "Yellow-800"}
-                        lightBorderColor={apiData.message.lightColor ?? "Yellow-300"}
-                        darkBorderColor={apiData.message.darkColor ?? "Yellow-600"}
+                        lightBackgroundColor={colorScheme + "-100"}
+                        darkBackgroundColor={colorScheme + "-800"}
+                        lightBorderColor={colorScheme + "-300"}
+                        darkBorderColor={colorScheme + "-600"}
                     >
                         <text
                             alignment="center middle"
                             size="small"
-                            lightColor={apiData.message.lightColor ?? "Global-Black"}
-                            darkColor={apiData.message.darkColor ?? "Global-White"}
+                            lightColor="Global-Black"
+                            darkColor="Global-White"
                             wrap
                         >{apiData.message.text}</text>
                     </vstack>
                 )}
+                <hstack width="100%" gap="small">
+                    <hstack
+                        width="33%"
+                        alignment="middle start"
+                        border="thin"
+                        cornerRadius="medium"
+                        lightBackgroundColor="PureGray-50"
+                        darkBackgroundColor="PureGray-900"
+                        lightBorderColor="PureGray-300"
+                        darkBorderColor="PureGray-600"
+                    >
+                        <zstack alignment="center middle">
+                            <image url="depression.png" width="30px" height="30px" imageWidth="30px" imageHeight="30px" />
+                            <text size="xsmall" color="black" weight="bold">30</text>
+                        </zstack>
+                        <text size="small">AL ONE</text>
+                        <spacer size="small" />
+                    </hstack>
+                    <hstack
+                        width="33%"
+                        alignment="middle start"
+                        border="thin"
+                        cornerRadius="medium"
+                        lightBackgroundColor="PureGray-50"
+                        darkBackgroundColor="PureGray-900"
+                        lightBorderColor="PureGray-300"
+                        darkBorderColor="PureGray-600"
+                    >
+                        <zstack alignment="center middle">
+                            <image url="depression.png" width="30px" height="30px" imageWidth="30px" imageHeight="30px" />
+                            <text size="xsmall" color="black" weight="bold">30</text>
+                        </zstack>
+                        <text size="small">AL ONE</text>
+                        <spacer size="small" />
+                    </hstack>
+                </hstack>
                 <hstack gap="small">
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.two?.count} title="TWO" />
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.atcf?.count} title="ATCF" />

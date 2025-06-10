@@ -14,7 +14,7 @@
  * License: BSD-3-Clause
  */
 
-import {JobContext, JSONObject, ScheduledJobEvent} from "@devvit/public-api";
+import {JobContext, JSONObject, ScheduledJobEvent, TriggerContext} from "@devvit/public-api";
 import {JobBase} from "./JobBase.js";
 import {AppSettings, SettingsEnvironment} from '../AppSettings.js';
 import {Notifier} from "../notifications/Notifier.js";
@@ -22,6 +22,7 @@ import {RedisService} from "../redis/RedisService.js";
 import {Logger} from "../Logger.js";
 import {SummaryApiSchema} from "../redis/schemas/summary-api/SummaryApiSchema.js";
 import {allowRepost, createSummaryPost, repostIfAtRepostFreq} from "../utils/summaryPostUtils.js";
+import {forceApiRefresh} from "../utils/jobUtils.js";
 
 export class DataUpdater extends JobBase {
 
@@ -173,5 +174,11 @@ export class DataUpdater extends JobBase {
         }
 
         logger.traceEnd();
+    }
+
+    public override async onAppUpdate(context: TriggerContext): Promise<void> {
+        const isEnabled = await super.onAppUpdate(context);
+        if (isEnabled)
+            await forceApiRefresh(context);
     }
 }

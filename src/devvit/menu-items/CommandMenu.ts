@@ -1,26 +1,26 @@
 ﻿/*!
- * Adds a subreddit level button to .
+ * Adds a subreddit level button which displays a form for various actions.
  *
  * Author: u/Beach-Brews
  * License: BSD-3-Clause
  */
 
 import {Devvit} from "@devvit/public-api";
-import {DataUpdater} from "../jobs/DataUpdater.js";
 import {Logger} from "../Logger.js";
 import {isMod} from "../utils/userUtils.js";
+import {actionMenuActions} from "./actions/index.js";
 
-export class StartDataUpdaterMenuItem {
+export class CommandMenuItem {
 
     public static Register() {
         Devvit.addMenuItem({
             forUserType: ['moderator'],
-            label: 'RHurricane - Start Data Updater',
+            label: 'RHurricane - Actions',
             location: 'subreddit',
             onPress: async (_, context) => {
 
                 // Create logger
-                const logger = await Logger.Create('Menu - Start Update', context.settings);
+                const logger = await Logger.Create('Menu - Actions', context.settings);
 
                 try {
                     // Check user is a mod
@@ -33,30 +33,66 @@ export class StartDataUpdaterMenuItem {
                         return;
                     }
 
-                    // Get the data update job instance
-                    const job = DataUpdater.Instance;
-                    if (!job) {
-                        context.ui.showToast({
-                            text: 'ERROR: Unable to locate Data Updater job instance.',
-                            appearance: 'neutral'
-                        });
-                        logger.error('Unable to locate DataUpdater instance.');
-                        return;
-                    }
+                    // Generate options from action list
+                    const options = Object.keys(actionMenuActions)
+                        .map(k => ({
+                            label: k.replaceAll('-', ' '),
+                            value: k
+                        }));
 
-                    // Schedule the job (it checks if already scheduled)
-                    await job.scheduleCronJob(context);
+                    // Show form
+                    const commandForm = Devvit.createForm(
+                        {
+                            fields: [
+                                {
+                                    name: 'action',
+                                    label: 'Action',
+                                    type: 'select',
+                                    options: options
+                                },
+                            ],
+                            title: 'Select Action',
+                            acceptLabel: 'Perform Action'
+                        },
+                        async ({ values }, ctx) => {
+                            try {
 
-                    context.ui.showToast({
-                        text: 'Data Updater Started',
-                        appearance: 'success'
-                    })
-                    logger.info('Successfully started DataUpdater job.');
+                                // Check user is a mod
+                                if (!(await isMod(context))) {
+                                    context.ui.showToast({
+                                        text: 'This action requires moderator access.',
+                                        appearance: 'neutral'
+                                    });
+                                    logger.info("User is not a moderator.");
+                                    return;
+                                }
+
+                                if (actionMenuActions.hasOwnProperty(values.action)) {
+                                    await actionMenuActions[values.action](ctx);
+                                    return;
+                                }
+
+                                logger.error('Unknown action:', values.action);
+                                ctx.ui.showToast({
+                                    text: `ERROR: unknown action: ${values.action}.`,
+                                    appearance: 'neutral'
+                                });
+                            } catch (e) {
+                                logger.error('Error performing action:', e);
+                                ctx.ui.showToast({
+                                    text: `ERROR: There was an error performing action: ${values.action}.`,
+                                    appearance: 'neutral'
+                                });
+                            }
+                        }
+                    );
+
+                    context.ui.showForm(commandForm);
 
                 } catch (ex) {
-                    logger.error('Error scheduling update job:', ex);
+                    logger.error('Error performing action:', ex);
                     context.ui.showToast({
-                        text: 'ERROR: There was an error starting the data updater.',
+                        text: 'ERROR: There was an error performing action.',
                         appearance: 'neutral'
                     });
                 }

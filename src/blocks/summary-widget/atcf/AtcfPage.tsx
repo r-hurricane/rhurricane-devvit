@@ -78,6 +78,7 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
 
     // TypeScript doesn't like props.setActive used below, because it is technically mutable
     const setActiveStorm = props.setActiveStorm;
+    const isActiveStorm = id === props.activeStorm;
 
     return (
         <vstack width="100%">
@@ -85,10 +86,12 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
             <Container onPress={setActiveStorm !== undefined ? () => setActiveStorm(props.activeStorm === id ? '' : id) : undefined}>
                 {/* In the case there are multiple storms, allow the storm name to be tapped to collapse and allow other storm details to be visible. */}
                 <hstack>
-                    <text style="heading">{name}</text>
+                    <text weight="bold" size="medium">
+                        {name}
+                    </text>
                 </hstack>
                 {/* Only render the storm details if chosen as the active storm. */}
-                {id === props.activeStorm && (
+                {isActiveStorm && (
                     <vstack width="100%">
                         <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white" />
                         <spacer size="small" />

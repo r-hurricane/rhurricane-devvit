@@ -24,7 +24,7 @@ export const Container = (props: ContainerProps) => {
         <vstack
             padding={props.padding ?? "small"}
             width={props.width ?? '100%'}
-            height={props.height}
+            height={props.height ?? undefined}
             alignment={props.alignment ?? "top start"}
             border={props.border ?? "thin"}
             cornerRadius={props.cornerRadius ?? "medium"}

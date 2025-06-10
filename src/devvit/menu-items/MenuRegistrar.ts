@@ -6,15 +6,13 @@
  * License: BSD-3-Clause
  */
 
-import {StartDataUpdaterMenuItem} from "./StartDataUpdater.js";
-import {StopDataUpdaterMenuItem} from "./StopDataUpdater.js";
 import {CreateSummaryPostMenuItem} from "./CreateSummaryPost.js";
+import {CommandMenuItem} from "./CommandMenu.js";
 
 export class MenuRegistrar {
 
     public static RegisterMenus() {
-        StartDataUpdaterMenuItem.Register();
-        StopDataUpdaterMenuItem.Register();
+        CommandMenuItem.Register();
         CreateSummaryPostMenuItem.Register();
     }
 

@@ -8,7 +8,6 @@
 import {Devvit} from "@devvit/public-api";
 import {JobController} from "../jobs/JobController.js";
 import {Logger} from "../Logger.js";
-import {RedisService} from "../redis/RedisService.js";
 
 export class AppUpgradeTrigger {
 
@@ -21,12 +20,6 @@ export class AppUpgradeTrigger {
                 const logger = await Logger.Create('App Update', context.settings);
 
                 try {
-                    // Clear the last API modified date from Redis
-                    // This essentially "forces" an API update, to ensure the Schema is updated ASAP
-                    // TODO: Possibly update this to call the API immediately in a helper with "force" argument
-                    const redis = new RedisService(context.redis);
-                    await redis.saveSummaryApiLastModified('');
-
                     // Call the onAppUpdate on all jobs
                     for (let j of JobController.Instance.jobList) {
                         await j.onAppUpdate(context);
