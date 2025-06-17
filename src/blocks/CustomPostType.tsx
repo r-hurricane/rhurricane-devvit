@@ -5,11 +5,11 @@
  * License: BSD-3-Clause
  */
 
-import {Devvit, Context, useAsync} from "@devvit/public-api";
+import {Context, Devvit, useAsync} from "@devvit/public-api";
 import {RedisService} from "../devvit/redis/RedisService.js";
 import {LoadingOrError} from "./LoadingOrError.js";
 import {SummaryWidget} from "./summary-widget/SummaryWidget.js";
-import {AppSettings} from "../devvit/AppSettings.js";
+import {AppSettings, MaintenanceLevel} from "../devvit/AppSettings.js";
 import {PostMetadataDto} from "../../shared/dtos/redis/PostMetadataDto.js";
 
 interface CustomPostTypeProps {
@@ -18,7 +18,8 @@ interface CustomPostTypeProps {
 }
 
 type CustomPostLoadData = {
-    maintenanceMode: boolean,
+    maintenanceMode: MaintenanceLevel,
+    maintenanceMessage: string | null,
     postMetadata: PostMetadataDto | null
 }
 
@@ -28,10 +29,11 @@ const CustomPostType = (props: CustomPostTypeProps) => {
     const {data, loading, error} = useAsync(
         async (): Promise<CustomPostLoadData> => {
             const maintenanceMode = await AppSettings.GetMaintenanceMode(props.context.settings);
-            const postMetadata = !maintenanceMode
+            const maintenanceMessage = await AppSettings.GetMaintenanceModeMessage(props.context.settings);
+            const postMetadata = maintenanceMode !== MaintenanceLevel.Hard
                 ? await new RedisService(props.context.redis).getPostMetadata(props.postId)
                 : null;
-            return { maintenanceMode: maintenanceMode, postMetadata: postMetadata};
+            return { maintenanceMode: maintenanceMode, maintenanceMessage: maintenanceMessage, postMetadata: postMetadata};
         },
         {
             finally: (_, error) => {
@@ -42,13 +44,15 @@ const CustomPostType = (props: CustomPostTypeProps) => {
     );
 
     // If loading or there was an error, show loading screen
-    if (loading || error || !data || !data.postMetadata || data.maintenanceMode) {
+    if (loading || error || !data || !data.postMetadata || data.maintenanceMode === MaintenanceLevel.Hard) {
         return <LoadingOrError
             error={!loading}
             errorMessage={
                 error && error.message.indexOf('redis currently manually disabled') > -1
                     ? 'Sorry, Reddit is performing app maintenance. Check back soon!'
-                    : data?.maintenanceMode ? 'Sorry, tracking app is under maintenance. Check back soon!' : undefined
+                    : data?.maintenanceMode === MaintenanceLevel.Hard
+                        ? data.maintenanceMessage !== null ? data.maintenanceMessage : 'Sorry, tracking app is under maintenance. Check back soon!'
+                        : undefined
             }
         />;
     }

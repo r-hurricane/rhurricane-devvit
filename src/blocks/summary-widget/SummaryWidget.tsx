@@ -9,7 +9,7 @@
  * License: BSD-3-Clause
  */
 
-import {Context, Devvit, BlockElement, useAsync, useState} from "@devvit/public-api";
+import {Context, Devvit, useAsync, useState} from "@devvit/public-api";
 import {MenuItem} from './MenuItem.js';
 import {TwoPage} from "./two/TwoPage.js";
 import {AtcfPage} from "./atcf/AtcfPage.js";
@@ -17,8 +17,9 @@ import {TcpodPage} from "./tcpod/TcpodPage.js";
 import {RedisService} from "../../devvit/redis/RedisService.js";
 import {LoadingOrError} from "../LoadingOrError.js";
 import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
-import {AppSettings, SettingsEnvironment} from "../../devvit/AppSettings.js";
-import {Container} from "./common/Container.js";
+import {AppSettings, MaintenanceLevel, SettingsEnvironment} from "../../devvit/AppSettings.js";
+import {Announcement} from "./common/Announcement.js";
+import {CurrentStorm} from "./common/CurrentStorm.js";
 
 export interface SummaryWidgetProps {
     context: Context;
@@ -50,11 +51,13 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
 
             // Get whether is the development data environment or not
             const isDev = (await AppSettings.GetEnvironment(props.context.settings)) !== SettingsEnvironment.Production;
+            const maintenanceMode = await AppSettings.GetMaintenanceMode(props.context.settings);
+            const maintenanceMessage = await AppSettings.GetMaintenanceModeMessage(props.context.settings);
 
             // Finally, fetch the actual data!
             const summaryApiData = await redis.getSummaryApiData();
 
-            return { isDev, summaryApiData };
+            return { isDev, summaryApiData, maintenanceMode, maintenanceMessage };
         },
         {
             finally: (_, error) => {
@@ -66,68 +69,23 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
     const loaded = !loading && !error;
     const apiData: SummaryApiDto | null = data?.summaryApiData ?? null;
 
+    // Setup app announcement
     const now = new Date().getTime();
-    const colorScheme = apiData?.message?.colorScheme ?? 'Yellow';
+    let announcement = data && data.maintenanceMode === MaintenanceLevel.Soft
+        ? (<Announcement>{data.maintenanceMessage ? data.maintenanceMessage : 'App maintenance underway.'}</Announcement>)
+        : apiData && !!apiData.message && apiData.message.start <= now && apiData.message.end >= now
+            ? (<Announcement colorScheme={apiData.message.colorScheme}>{apiData.message.text}</Announcement>)
+            : null;
 
     return (
         <zstack width="100%" height="100%">
             <vstack padding="small" width="100%" height="100%" gap="small" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
-                {apiData && !!apiData.message && apiData.message.start <= now && apiData.message.end >= now && (
-                    <vstack
-                        padding="xsmall"
-                        border="thin"
-                        alignment="center middle"
-                        cornerRadius="medium"
-                        lightBackgroundColor={colorScheme + "-100"}
-                        darkBackgroundColor={colorScheme + "-800"}
-                        lightBorderColor={colorScheme + "-300"}
-                        darkBorderColor={colorScheme + "-600"}
-                    >
-                        <text
-                            alignment="center middle"
-                            size="small"
-                            lightColor="Global-Black"
-                            darkColor="Global-White"
-                            wrap
-                        >{apiData.message.text}</text>
-                    </vstack>
+                {announcement}
+                {!!apiData?.currentStorms?.data && apiData.currentStorms.data.length > 0 && (
+                    <hstack width="100%" gap="small">
+                        {apiData.currentStorms.data.map(s => <CurrentStorm storm={s} context={props.context} />)}
+                    </hstack>
                 )}
-                <hstack width="100%" gap="small">
-                    <hstack
-                        width="33%"
-                        alignment="middle start"
-                        border="thin"
-                        cornerRadius="medium"
-                        lightBackgroundColor="PureGray-50"
-                        darkBackgroundColor="PureGray-900"
-                        lightBorderColor="PureGray-300"
-                        darkBorderColor="PureGray-600"
-                    >
-                        <zstack alignment="center middle">
-                            <image url="depression.png" width="30px" height="30px" imageWidth="30px" imageHeight="30px" />
-                            <text size="xsmall" color="black" weight="bold">30</text>
-                        </zstack>
-                        <text size="small">AL ONE</text>
-                        <spacer size="small" />
-                    </hstack>
-                    <hstack
-                        width="33%"
-                        alignment="middle start"
-                        border="thin"
-                        cornerRadius="medium"
-                        lightBackgroundColor="PureGray-50"
-                        darkBackgroundColor="PureGray-900"
-                        lightBorderColor="PureGray-300"
-                        darkBorderColor="PureGray-600"
-                    >
-                        <zstack alignment="center middle">
-                            <image url="depression.png" width="30px" height="30px" imageWidth="30px" imageHeight="30px" />
-                            <text size="xsmall" color="black" weight="bold">30</text>
-                        </zstack>
-                        <text size="small">AL ONE</text>
-                        <spacer size="small" />
-                    </hstack>
-                </hstack>
                 <hstack gap="small">
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.two?.count} title="TWO" />
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.atcf?.count} title="ATCF" />

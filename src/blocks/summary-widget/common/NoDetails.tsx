@@ -16,7 +16,7 @@ export interface NoDetailsProps extends ContainerProps {
 
 export const NoDetails = (props: NoDetailsProps) => {
     const {size, weight, children, ...containerProps} = props;
-    containerProps.height = containerProps.height ?? "100px";
+    containerProps.height = containerProps.height ?? "50px";
     containerProps.alignment = containerProps.alignment ?? "middle center";
     return (
         <Container {...containerProps}>

@@ -70,7 +70,7 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
     const name = `${c.name === 'INVEST' && atcf.invest
         ? `Invest ${c.basin}${atcf.invest.to.id}`
         : `${c.basin} ${c.level} ${c.name}`
-    }${p(' - ', windCat != 'TD' ? windCat : null)}`;
+    }${p(' - ', windCat != 'TD' ? windCat : c.levelCode)}`;
 
     // Force values for position, so toFixed can easily be called.
     const lat = c.lat ?? 0;
@@ -82,7 +82,6 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
 
     return (
         <vstack width="100%">
-            <spacer size="small" />
             <Container onPress={setActiveStorm !== undefined ? () => setActiveStorm(props.activeStorm === id ? '' : id) : undefined}>
                 {/* In the case there are multiple storms, allow the storm name to be tapped to collapse and allow other storm details to be visible. */}
                 <hstack>
@@ -153,7 +152,7 @@ export const AtcfPage = (props: AtcfPageProps) => {
     );
 
     return (
-        <vstack width="100%">
+        <vstack width="100%" gap="small">
             <Container alignment="middle center">
                 <text weight="bold" size="medium">
                     {widgetWidth < 500 ?

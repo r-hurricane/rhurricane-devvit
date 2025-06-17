@@ -22,6 +22,13 @@ export enum LogLevel {
     Trace
 }
 
+// Represents the three maintenance levels
+export enum MaintenanceLevel {
+    Off,
+    Soft,
+    Hard
+}
+
 // An enum of all settings keys (internal AppSettings use only)
 enum SettingKeys {
 
@@ -42,6 +49,9 @@ enum SettingKeys {
 
     // Whether in maintenance mode or not
     MaintenanceMode = 'maintenance-mode',
+
+    // Customized maintenance mode message
+    MaintenanceModeMessage = 'maintenance-mode-message',
 
     // Logging level
     LogLevel = 'log-level',
@@ -84,8 +94,16 @@ export class AppSettings {
     }
 
     // Gets whether maintenance mode is enabled or not.
-    public static async GetMaintenanceMode(settings: SettingsClient): Promise<boolean> {
-        return await settings.get<boolean>(SettingKeys.MaintenanceMode) ?? false;
+    public static async GetMaintenanceMode(settings: SettingsClient): Promise<MaintenanceLevel> {
+        const savedLvl = await settings.get<string[]>(SettingKeys.MaintenanceMode);
+        const key = savedLvl && savedLvl.length > 0 && savedLvl[0] ? savedLvl[0] : null;
+        return (key ? MaintenanceLevel[key as keyof typeof MaintenanceLevel] : MaintenanceLevel.Off) ?? MaintenanceLevel.Off;
+    }
+
+    // Gets the custom maintenance message.
+    public static async GetMaintenanceModeMessage(settings: SettingsClient): Promise<string | null> {
+        const val = await settings.get<string>(SettingKeys.MaintenanceModeMessage);
+        return val && val.length > 0 ? val : null;
     }
 
     // Gets the configured log level to reduce the amount of logs
@@ -175,11 +193,34 @@ export class AppSettings {
                 }
             },
             {
-                type: 'boolean',
+                type: 'select',
                 name: SettingKeys.MaintenanceMode,
                 label: 'Maintenance Mode',
-                helpText: 'Whether to enable or disable maintenance mode',
-                defaultValue: false,
+                helpText: 'Whether to enable or disable maintenance mode. Soft displays an announcement and the app is usable. Hard only displays the message and (X) icon.',
+                options: [
+                    {
+                        label: MaintenanceLevel[MaintenanceLevel.Off],
+                        value: MaintenanceLevel[MaintenanceLevel.Off]
+                    },
+                    {
+                        label: MaintenanceLevel[MaintenanceLevel.Soft],
+                        value: MaintenanceLevel[MaintenanceLevel.Soft]
+                    },
+                    {
+                        label: MaintenanceLevel[MaintenanceLevel.Hard],
+                        value: MaintenanceLevel[MaintenanceLevel.Hard]
+                    }
+                ],
+                defaultValue: [MaintenanceLevel[MaintenanceLevel.Off]],
+                multiSelect: false,
+                scope: SettingScope.Installation
+            },
+            {
+                type: 'string',
+                name: SettingKeys.MaintenanceModeMessage,
+                label: 'Custom Maintenance Message',
+                helpText: 'A message to display when maintenance is enabled.',
+                defaultValue: '',
                 scope: SettingScope.Installation
             },
             {

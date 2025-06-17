@@ -5,7 +5,7 @@
  * License: BSD-3-Clause
  */
 
-import {Devvit, Context} from "@devvit/public-api";
+import {Devvit, Context, useState} from "@devvit/public-api";
 import {TwoAreaOfInterest, TwoData} from "../../../../shared/dtos/redis/summary-api/SummaryApiTwoDtos.js";
 import SizeString = Devvit.Blocks.SizeString;
 import {NoDetails} from "../common/NoDetails.js";
@@ -44,10 +44,12 @@ interface TwoStormProps {
 const AreaOfInterest = (props: TwoStormProps) => {
     const maxChance = Math.max(props.storm.twoDay?.chance ?? 0, props.storm.sevenDay?.chance ?? 0);
     const colorScheme = chanceColorScheme(maxChance);
+    const [showDetail, setShowDetail] = useState(false);
     return (
-        <vstack>
+        <vstack width="100%">
             <spacer size="xsmall" />
-            <hstack
+            <vstack
+                width="100%"
                 padding="xsmall"
                 border="thin"
                 cornerRadius="small"
@@ -56,17 +58,27 @@ const AreaOfInterest = (props: TwoStormProps) => {
                 lightBorderColor={colorScheme+'-300'}
                 darkBorderColor={colorScheme+'-600'}
             >
-                {chanceImage(maxChance)}
-                <text width="35px" alignment="middle center">{props.storm.twoDay?.chance ?? 0}%</text>
-                <text>|</text>
-                <text width="35px" alignment="middle center">{props.storm.sevenDay?.chance ?? 0}%</text>
-                <text>|</text>
-                <spacer size="xsmall" />
-                <text width={(props.widgetWidth-135)+'px' as SizeString} overflow="ellipsis">
-                    {!!props.storm.id && props.storm.id.length > 0 ? props.storm.id + ' - ' : ''}
-                    {props.storm.title}
-                </text>
-            </hstack>
+                <hstack width="100%" onPress={() => setShowDetail(!showDetail)}>
+                    {chanceImage(maxChance)}
+                    <text width="35px" alignment="middle center">{props.storm.twoDay?.chance ?? 0}%</text>
+                    <text>|</text>
+                    <text width="35px" alignment="middle center">{props.storm.sevenDay?.chance ?? 0}%</text>
+                    <text>|</text>
+                    <spacer size="xsmall" />
+                    <text width={(props.widgetWidth-135)+'px' as SizeString} overflow="ellipsis">
+                        {!!props.storm.id && props.storm.id.length > 0 ? props.storm.id + ' - ' : ''}
+                        {props.storm.title}
+                    </text>
+                </hstack>
+                {showDetail && (
+                    <vstack width="100%">
+                        <spacer size="xsmall" />
+                        <hstack width="100%" height="1px" lightBackgroundColor="Global-Black" darkBackgroundColor="Global-White" />
+                        <spacer size="xsmall" />
+                        <text wrap>{props.storm.text ?? ''}</text>
+                    </vstack>
+                )}
+            </vstack>
         </vstack>
     );
 };
@@ -94,19 +106,12 @@ export const TwoPage = (props: TwoPageProps) => {
     // Print error if no data provided
     if (!props.two) {
         return (
-            <vstack>
-                <spacer size="small" />
-                <NoDetails weight="bold">Failed to load Tropical Weather Outlook. Try again later.</NoDetails>
-            </vstack>
+            <NoDetails weight="bold">Failed to load Tropical Weather Outlook. Try again later.</NoDetails>
         );
     }
 
-    // Get the colors based on the TWO highest chance
+    // Get the TWO data
     const two = props.two.basins;
-    const atlanticMax = two.atlantic.areas.length > 0 ? Math.max(...two.atlantic.areas.map(s => Math.max(s.twoDay?.chance ?? 0, s.sevenDay?.chance ?? 0))) : 0;
-    const pacificMax = two.pacific.areas.length > 0 ? Math.max(...two.pacific.areas.map(s => Math.max(s.twoDay?.chance ?? 0, s.sevenDay?.chance ?? 0))) : 0;
-    const highestChance = Math.max(atlanticMax, pacificMax);
-    const titleColor = chanceColorScheme(highestChance);
 
     // Get the atlantic and pacific basin summaries
     const atlanticSummary = two.atlantic.areas.length > 0
@@ -117,7 +122,7 @@ export const TwoPage = (props: TwoPageProps) => {
         : (<NoActivityExpected />);
 
     return (
-        <vstack width="100%">
+        <vstack width="100%" gap="small">
             <Container alignment="middle center">
                 <text weight="bold" size="medium">
                     {
@@ -130,16 +135,18 @@ export const TwoPage = (props: TwoPageProps) => {
                 {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
             </Container>
-            <spacer size="small" />
-            <hstack>
-                <text weight="bold" size="medium">Atlantic</text>
-            </hstack>
-            {atlanticSummary}
-            <spacer size="small" />
-            <hstack>
-                <text weight="bold" size="medium">Pacific</text>
-            </hstack>
-            {pacificSummary}
+            <vstack width="100%">
+                <hstack>
+                    <text weight="bold" size="medium">Atlantic</text>
+                </hstack>
+                {atlanticSummary}
+            </vstack>
+            <vstack width="100%">
+                <hstack>
+                    <text weight="bold" size="medium">Pacific</text>
+                </hstack>
+                {pacificSummary}
+            </vstack>
         </vstack>
     );
 };
