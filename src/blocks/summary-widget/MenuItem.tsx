@@ -20,7 +20,7 @@ export const MenuItem = (props: MenuItemProps) => {
     const hasCount = !props.disabled && props.count != undefined && props.count > 0;
     return (
         <hstack
-            padding="small"
+            padding="xsmall"
             border={isActive ? 'thick' : 'thin'}
             cornerRadius="medium"
             lightBackgroundColor={isActive ? 'AlienBlue-100' : (hasCount ? 'Yellow-50' : 'PureGray-50')}
@@ -32,7 +32,7 @@ export const MenuItem = (props: MenuItemProps) => {
             onPress={!props.disabled ? (() => props.setActivePage(props.title)) : undefined}
         >
             <text
-                size="large"
+                size="medium"
                 weight={isActive ? 'bold' : 'regular'}
                 lightColor={isActive ? 'AlienBlue-900' : ''}
                 darkColor={isActive ? 'AlienBlue-50' : ''}

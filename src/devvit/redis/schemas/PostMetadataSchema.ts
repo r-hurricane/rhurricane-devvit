@@ -10,5 +10,4 @@ import {z} from 'zod';
 export const PostMetadataSchema = z
     .object({
         type: z.enum(['summary', 'storm', 'recon'])
-    })
-    .strict();
+    });

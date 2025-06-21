@@ -137,7 +137,7 @@ export abstract class JobBase {
         }
     }
 
-    public async onAppUpdate(context: TriggerContext): Promise<void> {
+    public async onAppUpdate(context: TriggerContext): Promise<boolean> {
 
         // Create logger
         const logger = await Logger.Create('Job Base', context.settings);
@@ -157,9 +157,13 @@ export abstract class JobBase {
             if (isEnabled)
                 await this.scheduleCronJob(jobContext, true);
 
+            return isEnabled;
+
         } catch(ex) {
             logger.error(`OnAppUpdate: Error while running onAppUpdate for job ${this.jobName}.`, ex);
         }
+
+        return false;
     }
 
 }

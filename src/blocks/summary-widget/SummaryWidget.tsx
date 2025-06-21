@@ -17,7 +17,9 @@ import {TcpodPage} from "./tcpod/TcpodPage.js";
 import {RedisService} from "../../devvit/redis/RedisService.js";
 import {LoadingOrError} from "../LoadingOrError.js";
 import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
-import {AppSettings, SettingsEnvironment} from "../../devvit/AppSettings.js";
+import {AppSettings, MaintenanceLevel, SettingsEnvironment} from "../../devvit/AppSettings.js";
+import {Announcement} from "./common/Announcement.js";
+import {CurrentStorm} from "./common/CurrentStorm.js";
 
 export interface SummaryWidgetProps {
     context: Context;
@@ -49,11 +51,13 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
 
             // Get whether is the development data environment or not
             const isDev = (await AppSettings.GetEnvironment(props.context.settings)) !== SettingsEnvironment.Production;
+            const maintenanceMode = await AppSettings.GetMaintenanceMode(props.context.settings);
+            const maintenanceMessage = await AppSettings.GetMaintenanceModeMessage(props.context.settings);
 
             // Finally, fetch the actual data!
             const summaryApiData = await redis.getSummaryApiData();
 
-            return { isDev, summaryApiData };
+            return { isDev, summaryApiData, maintenanceMode, maintenanceMessage };
         },
         {
             finally: (_, error) => {
@@ -63,20 +67,34 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
         }
     );
     const loaded = !loading && !error;
-    const twoData: SummaryApiDto | null = data?.summaryApiData ?? null;
+    const apiData: SummaryApiDto | null = data?.summaryApiData ?? null;
+
+    // Setup app announcement
+    const now = new Date().getTime();
+    let announcement = data && data.maintenanceMode === MaintenanceLevel.Soft
+        ? (<Announcement>{data.maintenanceMessage ? data.maintenanceMessage : 'App maintenance underway.'}</Announcement>)
+        : apiData && !!apiData.message && apiData.message.start <= now && apiData.message.end >= now
+            ? (<Announcement colorScheme={apiData.message.colorScheme}>{apiData.message.text}</Announcement>)
+            : null;
 
     return (
         <zstack width="100%" height="100%">
-            <vstack padding="small" width="100%" height="100%" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+            <vstack padding="small" width="100%" height="100%" gap="small" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+                {announcement}
+                {!!apiData?.currentStorms?.data && apiData.currentStorms.data.length > 0 && (
+                    <hstack width="100%" gap="small">
+                        {apiData.currentStorms.data.map(s => <CurrentStorm storm={s} context={props.context} />)}
+                    </hstack>
+                )}
                 <hstack gap="small">
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.two?.count} title="TWO" />
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.atcf?.count} title="ATCF" />
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={twoData?.tcpod?.count} title="TCPOD" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.two?.count} title="TWO" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.atcf?.count} title="ATCF" />
+                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.tcpod?.count} title="TCPOD" />
                 </hstack>
                 {!loaded && <LoadingOrError error={!!error} message='Loading Tropical Weather Outlook...' />}
-                {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={twoData?.two?.data} />}
-                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} lastModified={twoData?.atcf?.lastModified} atcf={twoData?.atcf?.data} />}
-                {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} lastModified={twoData?.tcpod.lastModified} tcpod={twoData?.tcpod?.data} />}
+                {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={apiData?.two?.data} />}
+                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} lastModified={apiData?.atcf?.lastModified} atcf={apiData?.atcf?.data} />}
+                {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} lastModified={apiData?.tcpod.lastModified} tcpod={apiData?.tcpod?.data} />}
             </vstack>
             <vstack width="100%" height="100%" alignment="bottom start">
                 <vstack

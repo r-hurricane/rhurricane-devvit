@@ -19,23 +19,20 @@ export const ShapeGeometrySchema = z
             z.array(ShapeCoordinatesSchema),
             z.array(z.array(ShapeCoordinatesSchema))
         ]).nullable()
-    })
-    .strict();
+    });
 
 export const ShapeFeatureSchema = z
     .object({
         type: z.string(),
         geometry: ShapeGeometrySchema.nullable(),
         properties: z.record(z.string(), z.string()).nullable()
-    })
-    .strict();
+    });
 
 export const FormationChanceSchema = z
     .object({
         level: z.string(),
         chance: z.number()
-    })
-    .strict();
+    });
 
 export const TwoAreaOfInterestSchema = z
     .object({
@@ -45,8 +42,7 @@ export const TwoAreaOfInterestSchema = z
         twoDay: FormationChanceSchema.nullable(),
         sevenDay: FormationChanceSchema.nullable(),
         features: z.array(ShapeFeatureSchema).nullable()
-    })
-    .strict();
+    });
 
 export const TwoBasinSchema = z
     .object({
@@ -56,13 +52,12 @@ export const TwoBasinSchema = z
         active: z.string().nullable(),
         areas: z.array(TwoAreaOfInterestSchema),
         remark: z.string().nullable()
-    }).strict();
+    });
 
 export const SummaryApiTwoSchema = z
     .object({
         basins: z.object({
             atlantic: TwoBasinSchema,
             pacific: TwoBasinSchema
-        }).strict()
-    })
-    .strict();
+        })
+    });

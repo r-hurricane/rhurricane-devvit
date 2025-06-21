@@ -26,7 +26,9 @@ export const StormList = (props: StormListProps) => {
     const keys = Object.keys(props.storms);
     if (keys.length <= 0) {
         return (
-            <NoDetails>No missions scheduled.</NoDetails>
+            <vstack width="100%">
+                <NoDetails>No missions scheduled.</NoDetails>
+            </vstack>
         );
     }
 
@@ -62,13 +64,13 @@ export const StormList = (props: StormListProps) => {
     };
 
     return (
-        <vstack>
+        <vstack width="100%">
             {Object.keys(props.storms).map(k => (
                 <Container>
                     <text weight="bold">{k}</text>
                     <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white"></hstack>
                     <spacer size="xsmall" />
-                    <vstack>
+                    <vstack width="100%">
                         {props.storms[k] && props.storms[k].map(s => {
                             const status = getStatus(s);
                             return (
@@ -140,7 +142,7 @@ export const TcpodBasinButton = (props: TcpodBasinButtonProps) => {
             onPress={() => props.setActiveBasin(props.title)}
         >
             <text
-                size="large"
+                size="medium"
                 weight={isActive ? 'bold' : 'regular'}
                 lightColor={isActive ? 'AlienBlue-900' : ''}
                 darkColor={isActive ? 'AlienBlue-50' : ''}
@@ -214,9 +216,8 @@ export const TcpodPage = (props: TcpodPageProps) => {
 
     return (
         <vstack width="100%">
-            <spacer size="medium" />
             <Container alignment="middle center">
-                <text weight="bold" size="large">
+                <text weight="bold" size="medium">
                     {widgetWidth < 500 ?
                         'Recon Mission Schedule (TCPOD)'
                         : 'Tropical Cyclone Plan of the Day (TCPOD)'
@@ -224,21 +225,21 @@ export const TcpodPage = (props: TcpodPageProps) => {
                 </text>
                 <text size="small">
                     {
-                        formatDate(props.tcpod?.today?.message?.header?.issued?.time
-                            ?? props.tcpod?.tomorrow?.message?.header?.issued?.time
+                        formatDate(props.tcpod?.tomorrow?.message?.header?.issued?.time
+                            ?? props.tcpod?.today?.message?.header?.issued?.time
                             ?? props.lastModified)
                     }
                 </text>
                 {/* Temporarily remove webview note, until webview is added */}
                 {/*<text size="xsmall">Open Details</text>*/}
             </Container>
-            <spacer size="medium" />
+            <spacer size="small" />
             <hstack width="100%" gap="small">
                 <TcpodBasinButton title="Atlantic" missions={atlanticCounts.missionCount} outlook={atlanticCounts.outlookCount} activeBasin={activeBasin} setActiveBasin={setActiveBasin} />
                 <TcpodBasinButton title="Pacific" missions={pacificCounts.missionCount} outlook={pacificCounts.outlookCount} activeBasin={activeBasin} setActiveBasin={setActiveBasin} />
             </hstack>
-            <spacer size="medium" />
-            <vstack gap="small">
+            <spacer size="small" />
+            <vstack gap="small" width="100%">
                 <StormList storms={activeCounts.storms} />
                 <TcpodOutlook outlook={activeCounts.tomorrowOutlook} />
             </vstack>

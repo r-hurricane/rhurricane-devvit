@@ -29,7 +29,32 @@ export type SummaryApiData<TData> = {
     count: number;
 }
 
+export type SummaryMessage = {
+    text: string;
+    start: number;
+    end: number;
+    colorScheme?: string | undefined;
+}
+
+export type SummaryCurrentStormData = {
+    id: string;
+    binNumber: string;
+    name: string;
+    classification: string;
+    intensity: string;
+    pressure: string;
+    latitude: string;
+    longitude: string;
+    latitudeNumeric: number;
+    longitudeNumeric: number;
+    movementDir: number;
+    movementSpeed: number;
+    lastUpdate: string;
+}
+
 export type SummaryApiDto = {
+    message?: SummaryMessage | null | undefined;
+    currentStorms: SummaryApiData<SummaryCurrentStormData[]>;
     two: SummaryApiData<TwoData>;
     atcf: SummaryApiData<AtcfData[]>;
     tcpod: SummaryApiData<TcpodData>;

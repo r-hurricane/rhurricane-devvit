@@ -14,8 +14,7 @@ export const Nous42HeaderTcpodSchema = z
         tc: z.boolean(),
         yr: z.string().nullable(),
         seq: z.string().nullable()
-	})
-	.strict();
+	});
 
 export const Nous42HeaderSchema = z
 	.object({
@@ -27,15 +26,13 @@ export const Nous42HeaderSchema = z
         correction: z.boolean().nullable(),
         amendment: z.boolean().nullable(),
         remark: z.string().nullable()
-	})
-	.strict();
+	});
 
 export const Nous42OutlookSchema = z
 	.object({
         negative: z.boolean(),
         text: z.string()
-	})
-	.strict();
+	});
 
 export const Nous42CanceledSchema = z
 	.object({
@@ -45,15 +42,13 @@ export const Nous42CanceledSchema = z
         tcpodSeq: z.string().nullable().optional(),
         required: WmoDateRangeSchema.nullable().optional(),
         canceledAt: WmoDateSchema.optional()
-	})
-	.strict();
+	});
 
 export const Nous42AltitudeSchema = z
 	.object({
         upper: z.number().nullable(),
         lower: z.number().nullable()
-	})
-	.strict();
+	});
 
 export const Nous42MissionSchema = z
 	.object({
@@ -68,16 +63,14 @@ export const Nous42MissionSchema = z
         profile: z.string().nullable(),
         wra: z.boolean().nullable(),
         remarks: z.string().nullable()
-	})
-	.strict();
+	});
 
 export const Nous42StormSchema = z
 	.object({
         name: z.string().nullable(),
         text: z.string().nullable(),
         missions: z.array(Nous42MissionSchema)
-	})
-	.strict();
+	});
 
 export const Nous42BasinSchema = z
 	.object({
@@ -85,8 +78,7 @@ export const Nous42BasinSchema = z
         outlook: z.array(Nous42OutlookSchema),
         remarks: z.array(z.string()),
         canceled: z.array(Nous42CanceledSchema)
-	})
-	.strict();
+	});
 
 export const Nous42Schema = z
 	.object({
@@ -94,16 +86,14 @@ export const Nous42Schema = z
         atlantic: Nous42BasinSchema.nullable(),
         pacific: Nous42BasinSchema.nullable(),
         note: z.string().nullable()
-	})
-	.strict();
+	});
 
 export const WmoHeaderSegmentSchema = z
     .object({
         major: z.string().nullable(),
         minor: z.string().nullable(),
         last: z.boolean()
-    })
-    .strict();
+    });
 
 export const WmoHeaderSchema = z
     .object({
@@ -115,19 +105,16 @@ export const WmoHeaderSchema = z
         correction: z.string().nullable(),
         amendment: z.string().nullable(),
         segment: WmoHeaderSegmentSchema.nullable()
-    })
-    .strict();
+    });
 
 export const TcpodWmoSchema = z
 	.object({
         header: WmoHeaderSchema,
         message: Nous42Schema
-	})
-	.strict();
+	});
 
 export const SummaryApiTcpodSchema = z
 	.object({
         today: TcpodWmoSchema.nullable(),
         tomorrow: TcpodWmoSchema.nullable()
-	})
-	.strict();
+	});

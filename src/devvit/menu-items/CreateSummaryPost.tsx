@@ -17,6 +17,7 @@ export class CreateSummaryPostMenuItem {
 
     public static Register() {
         Devvit.addMenuItem({
+            forUserType: ['moderator'],
             label: 'RHurricane - Create Summary Post',
             location: 'subreddit',
             onPress: async (_, context) => {
