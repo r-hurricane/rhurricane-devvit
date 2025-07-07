@@ -64,7 +64,7 @@ export const StormList = (props: StormListProps) => {
     };
 
     return (
-        <vstack width="100%">
+        <vstack width="100%" gap="small">
             {Object.keys(props.storms).map(k => (
                 <Container>
                     <text weight="bold">{k}</text>

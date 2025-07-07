@@ -18,7 +18,7 @@ export const LoadingOrError = (props: LoadingOrErrorProps) => {
         <zstack width="100%" height="100%" alignment="center middle">
             <vstack width="100%" height="100%" alignment="center middle">
                 <image
-                    url={!props.error && !props.errorMessage ? "loading.gif" : "post-tropical.png"}
+                    url={!props.error && !props.errorMessage ? "loading.gif" : "error.png"}
                     description="Loading..."
                     height="170px"
                     width="170px"

@@ -15,9 +15,9 @@ export interface CurrentStormProps {
 
 const imageForClass = (classification: string, intensity: string) => {
     switch (classification?.toUpperCase()) {
-        case "TC": return "high-chance.png";
-        case "TD": case "STD": case "STS": return "depression.png";
-        case "TS": return "tropical-storm.png";
+        case "PC": return "high-chance.png";
+        case "TD": case "STD": return "depression.png";
+        case "TS": case "STS": return "tropical-storm.png";
         case "HU":
             const susWind = parseInt(intensity);
             if (susWind >= 137) return 'cat5.png';
@@ -25,7 +25,7 @@ const imageForClass = (classification: string, intensity: string) => {
             if (susWind >= 96) return 'cat3.png';
             if (susWind >= 83) return 'cat2.png';
             if (susWind >= 64) return 'cat1.png';
-            return "error.png";
+            return "tropical-storm.png";
     }
     return "post-tropical.png";
 };

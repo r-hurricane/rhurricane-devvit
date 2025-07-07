@@ -110,7 +110,7 @@ export class DataUpdater extends JobBase {
             }
 
             // If repost automation is enabled, we need to fetch the "old" data to know if there is a "significant" change
-            const lastSummaryApiData = allowReposts ? await redis.getSummaryApiData() : null;
+            const lastSummaryApiData = allowReposts && lastModified ? await redis.getSummaryApiData() : null;
             logger.debug(lastSummaryApiData ? 'Received previous summary API data' : 'Repost disabled, or no previous summary API data to compare');
 
             // Save the API result to Redis for the summary post!
@@ -176,9 +176,10 @@ export class DataUpdater extends JobBase {
         logger.traceEnd();
     }
 
-    public override async onAppUpdate(context: TriggerContext): Promise<void> {
+    public override async onAppUpdate(context: TriggerContext): Promise<boolean> {
         const isEnabled = await super.onAppUpdate(context);
         if (isEnabled)
             await forceApiRefresh(context);
+        return isEnabled;
     }
 }

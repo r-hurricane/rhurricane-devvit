@@ -77,15 +77,24 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
             ? (<Announcement colorScheme={apiData.message.colorScheme}>{apiData.message.text}</Announcement>)
             : null;
 
+    // Split current storm list into groups of 3
+    const currentStorms = [];
+    if (apiData?.currentStorms?.data && apiData.currentStorms.data.length > 0) {
+        for (let i = 0; i < apiData.currentStorms.data.length; i += 3) {
+            const batch = apiData.currentStorms.data.slice(i, i + 3);
+            currentStorms.push((
+                <hstack width="100%" gap="small">
+                    {batch.map(s => <CurrentStorm storm={s} context={props.context} />)}
+                </hstack>
+            ));
+        }
+    }
+
     return (
         <zstack width="100%" height="100%">
             <vstack padding="small" width="100%" height="100%" gap="small" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
                 {announcement}
-                {!!apiData?.currentStorms?.data && apiData.currentStorms.data.length > 0 && (
-                    <hstack width="100%" gap="small">
-                        {apiData.currentStorms.data.map(s => <CurrentStorm storm={s} context={props.context} />)}
-                    </hstack>
-                )}
+                {currentStorms}
                 <hstack gap="small">
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.two?.count} title="TWO" />
                     <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.atcf?.count} title="ATCF" />
