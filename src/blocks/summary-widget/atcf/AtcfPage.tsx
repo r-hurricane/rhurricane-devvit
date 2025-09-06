@@ -5,11 +5,13 @@
  * License: BSD-3-Clause
  */
 
-import {Context, Devvit, useState} from "@devvit/public-api";
+import {Devvit, useState} from "@devvit/public-api";
 import {AtcfData} from "../../../../shared/dtos/redis/summary-api/SummaryApiAtcfDtos.js";
 import {NoDetails} from "../common/NoDetails.js";
 import {Container} from "../common/Container.js";
 import {formatDate} from "../../../../shared/render/formatDate.js";
+import {SummaryContext} from "../SummaryContext.js";
+import {distanceString, speedString} from "../../../../shared/render/unitConversion.js";
 
 // Helper method to get the hurricane category from wind strength
 const windCategory = (susWind: number | null): string | null => {
@@ -33,7 +35,7 @@ const getDate = (s: string | null): string => {
 
 // Renders the details of a specific ATCF storm
 interface AtcfStormProps {
-    context: Context;
+    context: SummaryContext;
     storm: AtcfData;
     activeStorm: string;
     setActiveStorm: ((id: string) => void) | undefined;
@@ -59,6 +61,21 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
                 <hstack gap="small"><text weight="bold">{name}:</text><text>{value}</text></hstack>
             );
         };
+
+    // Helper for printing speeds
+    const speed = (val: number | null | undefined) => {
+        return speedString(val, props.context.userPreferences);
+    };
+
+    // Helper for printing distances
+    const dist = (val: number | null | undefined) => {
+        return distanceString(val, props.context.userPreferences);
+    };
+
+    // Helper for wind radius
+    const windRad = (val: number | null | undefined) => {
+        return distanceString(c.windRad?.code == 'AAA' ? c.windRad.ne : val, props.context.userPreferences, true, 3);
+    };
 
     // Create the storm ID (Basin + Storm Number) (e.g. AL3)
     const id = `${c.basin}${c.stormNo}`;
@@ -96,15 +113,15 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
                         <spacer size="small" />
                         {pRow(c.date, 'Updated', getDate(c.date))}
                         {pRow(c.lat, 'Pos', `${lat.toFixed(1)}${lat > 0 ? 'N' : 'S'} ${lon.toFixed(1)}${lon > 0 ? 'E' : 'W'}`)}
-                        {pRow(c.maxSusWind, 'Wind', `${c.maxSusWind}kt${p(' / ', c.windGust, 'kt')}${p(' @ ', c.maxWindRad, 'nmi')}`)}
-                        {pRow(c.minSeaLevelPsur, 'Psur', `${c.minSeaLevelPsur}mb${p(' - ', c.outerPsur, 'mb')}${p(' @ ', c.outerRad, 'nmi')}`)}
+                        {pRow(c.maxSusWind, 'Wind', `${speed(c.maxSusWind)}${p(' / ', speed(c.windGust))}${p(' @ ', dist(c.maxWindRad))}`)}
+                        {pRow(c.minSeaLevelPsur, 'Psur', `${c.minSeaLevelPsur}mb${p(' - ', c.outerPsur, 'mb')}${p(' @ ', dist(c.outerRad))}`)}
                         {pRow(c.depth, 'Depth', `${c.depth}`)}
-                        {pRow(c.windRad?.rad, 'Wind Radi', `${c.windRad?.rad}NM`)}
+                        {pRow(c.windRad?.rad, 'Wind Radi', speed(c.windRad?.rad) ?? '--')}
                         {c.windRad?.rad ? (
                             <vstack>
-                                <text>{c.windRad.nw?.toString().padStart(3, ' ') ?? '  0'}kt ------ {c.windRad.ne?.toString().padStart(3, ' ') ?? '  0'}kt</text>
-                                <text>{c.eyeDia?.toString().padStart(12, '\xa0') ?? '  0'}NM</text>
-                                <text>{c.windRad.sw?.toString().padStart(3, ' ') ?? '  0'}kt ------ {c.windRad.se?.toString().padStart(3, ' ') ?? '  0'}kt</text>
+                                <text>{windRad(c.windRad.nw)} ------ {windRad(c.windRad.ne)}</text>
+                                <text>{dist(c.eyeDia).padStart(windRad(c.windRad.nw).length * 2 + 2, '\xa0')}</text>
+                                <text>{windRad(c.windRad.sw)} ------ {windRad(c.windRad.se)}</text>
                             </vstack>
                         ) : null}
                     </vstack>
@@ -115,14 +132,14 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
 };
 
 interface AtcfPageProps {
-    context: Context;
+    context: SummaryContext;
     lastModified: number | null | undefined;
     atcf: AtcfData[] | undefined;
 }
 
 export const AtcfPage = (props: AtcfPageProps) => {
     // Get dimensions from context
-    const widgetWidth = props.context.dimensions?.width ?? 288;
+    const widgetWidth = props.context.blocks.dimensions?.width ?? 288;
 
     // Display general message if ATCF data is missing / failed to load
     if (!props.atcf) {

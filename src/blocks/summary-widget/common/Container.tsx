@@ -17,6 +17,7 @@ export interface ContainerProps {
     colorScheme?: string;
     onPress?: Devvit.Blocks.OnPressEventHandler | undefined;
     children: Devvit.ElementChildren;
+    grow?: boolean;
 }
 
 export const Container = (props: ContainerProps) => {
@@ -27,11 +28,12 @@ export const Container = (props: ContainerProps) => {
             height={props.height ?? undefined}
             alignment={props.alignment ?? "top start"}
             border={props.border ?? "thin"}
-            cornerRadius={props.cornerRadius ?? "medium"}
+            cornerRadius={props.cornerRadius ?? "small"}
             lightBackgroundColor={`${props.colorScheme ?? 'PureGray'}-50`}
             darkBackgroundColor={`${props.colorScheme ?? 'PureGray'}-900`}
             lightBorderColor={`${props.colorScheme ?? 'PureGray'}-300`}
             darkBorderColor={`${props.colorScheme ?? 'PureGray'}-600`}
+            grow={props.grow ?? undefined}
             onPress={props.onPress}
         >
             {props.children}

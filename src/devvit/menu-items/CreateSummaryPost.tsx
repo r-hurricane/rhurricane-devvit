@@ -65,7 +65,7 @@ export class CreateSummaryPostMenuItem {
                     }
 
                     // Submit the new post
-                    const result = await createSummaryPost(context);
+                    const result = await createSummaryPost(context, 'Tropical Weather Summary');
                     context.ui.showToast(result.toast);
                     if (result.post)
                         context.ui.navigateTo(result.post);

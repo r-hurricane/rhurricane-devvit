@@ -20,6 +20,9 @@ import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDt
 import {AppSettings, MaintenanceLevel, SettingsEnvironment} from "../../devvit/AppSettings.js";
 import {Announcement} from "./common/Announcement.js";
 import {CurrentStorm} from "./common/CurrentStorm.js";
+import {UserPreferencesPage} from "./preferences/UserPreferencesPage.js";
+import {DefaultUserPreferences} from "../../../shared/dtos/redis/UserPreferencesDto.js";
+import {SummaryContext} from "./SummaryContext.js";
 
 export interface SummaryWidgetProps {
     context: Context;
@@ -27,6 +30,9 @@ export interface SummaryWidgetProps {
 
 export const SummaryWidget = (props: SummaryWidgetProps) => {
     const [activePage, setActivePage] = useState('TWO');
+    const [showDisclaim, setShowDisclaim] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [userPreferences, setUserPreferences] = useState(DefaultUserPreferences);
 
     const {data, loading, error} = useAsync(
         async () => {
@@ -54,13 +60,20 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
             const maintenanceMode = await AppSettings.GetMaintenanceMode(props.context.settings);
             const maintenanceMessage = await AppSettings.GetMaintenanceModeMessage(props.context.settings);
 
-            // Finally, fetch the actual data!
+            // Fetch the actual summary data!
             const summaryApiData = await redis.getSummaryApiData();
 
-            return { isDev, summaryApiData, maintenanceMode, maintenanceMessage };
+            // And user preferences
+            const userPreferences = props.context.userId
+                ? await redis.getUserPreferences(props.context.userId)
+                : null;
+
+            return { isDev, summaryApiData, maintenanceMode, maintenanceMessage, userPreferences };
         },
         {
-            finally: (_, error) => {
+            finally: (data, error) => {
+                if (data && data.userPreferences)
+                    setUserPreferences(data.userPreferences);
                 if (error)
                     console.error('[RHurricane Summary Load] - Error fetching summary data: ', error);
             }
@@ -68,6 +81,10 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
     );
     const loaded = !loading && !error;
     const apiData: SummaryApiDto | null = data?.summaryApiData ?? null;
+    const summaryContext: SummaryContext = {
+        blocks: props.context,
+        userPreferences: userPreferences
+    };
 
     // Setup app announcement
     const now = new Date().getTime();
@@ -80,11 +97,23 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
     // Split current storm list into groups of 3
     const currentStorms = [];
     if (apiData?.currentStorms?.data && apiData.currentStorms.data.length > 0) {
-        for (let i = 0; i < apiData.currentStorms.data.length; i += 3) {
+        const apiStorms = apiData.currentStorms.data;
+        apiStorms.sort((a,b) => {
+            return a.binNumber > b.binNumber ? 1 : a.binNumber < b.binNumber ? -1 : 0;
+        });
+        for (let i = 0; i < apiStorms.length; i += 3) {
             const batch = apiData.currentStorms.data.slice(i, i + 3);
+            const storms = [];
+            for (let j = 0; j < 3; ++j) {
+                if (batch.length > j) {
+                    storms.push(<CurrentStorm storm={batch[j]} context={summaryContext} isLast={j == 2} />);
+                } else {
+                    storms.push(<hstack width={j == 2 ? '34%' : '33%'} />);
+                }
+            }
             currentStorms.push((
                 <hstack width="100%" gap="small">
-                    {batch.map(s => <CurrentStorm storm={s} context={props.context} />)}
+                    {storms}
                 </hstack>
             ));
         }
@@ -95,42 +124,57 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
             <vstack padding="small" width="100%" height="100%" gap="small" grow lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
                 {announcement}
                 {currentStorms}
-                <hstack gap="small">
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.two?.count} title="TWO" />
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.atcf?.count} title="ATCF" />
-                    <MenuItem activePage={activePage} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.tcpod?.count} title="TCPOD" />
+                <hstack width="100%" gap="small">
+                    <MenuItem activePage={activePage} isLast={false} disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.two?.count} title="TWO" />
+                    <MenuItem activePage={activePage} isLast={false}  disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.atcf?.count} title="ATCF" />
+                    <MenuItem activePage={activePage} isLast={true}  disabled={loading || !!error} setActivePage={setActivePage} count={apiData?.tcpod?.count} title="TCPOD" />
                 </hstack>
                 {!loaded && <LoadingOrError error={!!error} message='Loading Tropical Weather Outlook...' />}
                 {loaded && activePage === 'TWO' && <TwoPage context={props.context} two={apiData?.two?.data} />}
-                {loaded && activePage === 'ATCF' && <AtcfPage context={props.context} lastModified={apiData?.atcf?.lastModified} atcf={apiData?.atcf?.data} />}
+                {loaded && activePage === 'ATCF' && <AtcfPage context={summaryContext} lastModified={apiData?.atcf?.lastModified} atcf={apiData?.atcf?.data} />}
                 {loaded && activePage === 'TCPOD' && <TcpodPage context={props.context} lastModified={apiData?.tcpod.lastModified} tcpod={apiData?.tcpod?.data} />}
             </vstack>
             <vstack width="100%" height="100%" alignment="bottom start">
-                <vstack
-                    width="100%"
-                    border="thin"
-                    alignment="top center"
-                    lightBackgroundColor="Global-White"
-                    darkBackgroundColor="Global-Black"
-                    onPress={() => {setActivePage('DIS')}}
-                    padding="xsmall"
-                >
-                    {data?.isDev === true && (<text size="medium" weight="bold" color="danger-plain">TEST DATA - NOT LIVE STORM DATA</text>)}
-                    <text size="medium" weight="bold">&gt; &gt; &gt; Press to review Data Disclaimer! &lt; &lt; &lt;</text>
-                </vstack>
+                <hstack width="100%" height="1px" lightBackgroundColor="PureGray-300" darkBackgroundColor="PureGray-700" />
+                <hstack width="100%" padding="small" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+                    <hstack width="33%" alignment="middle start">
+                        {/*<hstack padding="small" border="thin" alignment="middle start" darkBackgroundColor="Yellow-800" lightBackgroundColor="Yellow-50" cornerRadius="full" onPress={() => {setShowDisclaim(true)}}>
+                            <icon name="info" darkColor="Yellow-50" lightColor="Yellow-800" size="small" />
+                            <spacer size="small" />
+                            <text>Disclaimer</text>
+                        </hstack>*/}
+                        <button size="small" icon="info" onPress={() => {setShowDisclaim(true)}}>
+                            {`\xa0Disclaimer`}
+                        </button>
+                    </hstack>
+                    <hstack width="33%" alignment="middle center">
+                        {/*<button size="small" icon="help">
+                            {`\xa0Guide`}
+                        </button>*/}
+                    </hstack>
+                    <hstack width="34%" alignment="middle end">
+                        <button size="small" icon="settings" onPress={() => {setShowSettings(!loading && !error)}}>
+                            {`\xa0Settings`}
+                        </button>
+                    </hstack>
+                </hstack>
             </vstack>
-            {activePage === 'DIS' && (
-                <vstack width="100%" height="100%" padding="medium" alignment="top start" gap="small" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
+            {showSettings && (
+                <UserPreferencesPage context={props.context} setShowSettings={setShowSettings} userPreferences={userPreferences} setUserPreferences={setUserPreferences} />
+            )}
+            {showDisclaim && (
+                <vstack width="100%" height="100%" padding="small" alignment="top start" gap="small" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
                     <text style="heading" size="xlarge">Data Disclaimer</text>
                     <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white" />
                     <text size="xlarge" weight="bold" color="danger-plain" wrap>This app is is NOT an official government app and therefore should not be used for any decisions pertaining to your safety or security!</text>
                     <text wrap>Please visit official government channels for the most accurate information and warnings:</text>
-                    <button onPress={() => { props.context.ui.navigateTo("https://nhc.noaa.gov"); }}>National Hurricane Center (NHC) (https://nhc.noaa.gov)</button>
-                    <button onPress={() => { props.context.ui.navigateTo("https://www.metoc.navy.mil/jtwc/jtwc.html"); }}>Joint Typhoon Warning Center (JTWC) (https://www.metoc.navy.mil/jtwc/jtwc.html)</button>
-                    <text wrap>Data obtained from the National Hurricane Center (NHC) and National Weather Service (NWS)</text>
-                    <text wrap>Developed and maintained by u/Beach-Brews</text>
+                    <button icon="external" onPress={() => { props.context.ui.navigateTo("https://nhc.noaa.gov"); }}>National Hurricane Center (NHC)</button>
+                    <button icon="external" onPress={() => { props.context.ui.navigateTo("https://www.metoc.navy.mil/jtwc/jtwc.html"); }}>Joint Typhoon Warning Center (JTWC)</button>
+                    <text wrap>Data obtained from the National Hurricane Center (NHC) and National Weather Service (NWS).</text>
+                    <text wrap>This app does not track you, but your user ID (not name) may be used to save your preferences.</text>
+                    <text wrap>Developed and maintained by u/Beach-Brews.</text>
                     <hstack width="100%" alignment="bottom center">
-                        <button width="100%" onPress={() => {setActivePage('TWO')}}>Acknowledged</button>
+                        <button width="50%" appearance="primary" onPress={() => {setShowDisclaim(false)}}>Acknowledged</button>
                     </hstack>
                 </vstack>
             )}

@@ -5,12 +5,15 @@
  * License: BSD-3-Clause
  */
 
-import {Devvit, Context} from "@devvit/public-api";
+import {Devvit} from "@devvit/public-api";
 import {SummaryCurrentStormData} from "../../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
+import {SummaryContext} from "../SummaryContext.js";
+import {convertSpeed, speedString} from "../../../../shared/render/unitConversion.js";
 
 export interface CurrentStormProps {
-    context: Context;
+    context: SummaryContext;
     storm: SummaryCurrentStormData;
+    isLast: boolean;
 }
 
 const imageForClass = (classification: string, intensity: string) => {
@@ -33,21 +36,21 @@ const imageForClass = (classification: string, intensity: string) => {
 export const CurrentStorm = (props: CurrentStormProps) => {
     return (
         <hstack
-            width="33%"
+            width={props.isLast ? '34%' : '33%'}
             alignment="middle start"
             border="thin"
-            cornerRadius="medium"
+            cornerRadius="small"
             lightBackgroundColor="PureGray-50"
             darkBackgroundColor="PureGray-900"
             lightBorderColor="PureGray-300"
             darkBorderColor="PureGray-600"
-            onPress={() => props.context.ui.navigateTo('https://nhc.noaa.gov')}
+            onPress={() => props.context.blocks.ui.navigateTo('https://nhc.noaa.gov')}
         >
             <zstack alignment="center middle">
                 <image url={imageForClass(props.storm.classification, props.storm.intensity)} width="30px" height="30px" imageWidth="30px" imageHeight="30px" />
-                <text size="xsmall" color="black" weight="bold">{props.storm.intensity}</text>
+                <text size="xsmall" color="black" weight="bold">{speedString(props.storm.intensity, props.context.userPreferences, false)}</text>
             </zstack>
-            <text size="small">{props.storm.name}</text>
+            <text size="small">{props.storm.binNumber.substring(0, 2).toUpperCase()} - {props.storm.name}</text>
             <spacer size="small" />
         </hstack>
     );

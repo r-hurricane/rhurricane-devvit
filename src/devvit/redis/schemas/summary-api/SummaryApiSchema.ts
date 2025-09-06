@@ -32,8 +32,8 @@ const SummaryCurrentStormSchema = z
         longitude: z.string(),
         latitudeNumeric: z.number(),
         longitudeNumeric: z.number(),
-        movementDir: z.number(),
-        movementSpeed: z.number(),
+        movementDir: z.number().nullable(),
+        movementSpeed: z.number().nullable(),
         lastUpdate: z.string()
     });
 
