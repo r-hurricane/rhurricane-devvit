@@ -105,7 +105,7 @@ export const TcpodOutlook = (props: TcpodOutlookProps) => {
 
     // Otherwise, print each outlook text
     return (
-        <Container>
+        <Container grow={true} alignment="top start">
             <text weight="bold">Tomorrow's Outlook</text>
             <hstack width="100%" height="1px" lightBackgroundColor="black" darkBackgroundColor="white"></hstack>
             <spacer size="small" />
@@ -132,7 +132,7 @@ export const TcpodBasinButton = (props: TcpodBasinButtonProps) => {
         <hstack
             padding="small"
             border={isActive ? 'thick' : 'thin'}
-            cornerRadius="medium"
+            cornerRadius="small"
             lightBackgroundColor={isActive ? 'AlienBlue-100' : (hasCount ? 'Yellow-50' : 'PureGray-50')}
             lightBorderColor={isActive ? 'AlienBlue-700' : (hasCount ? 'Yellow-300' : 'PureGray-300')}
             darkBackgroundColor={isActive ? 'AlienBlue-800' : (hasCount ? 'Yellow-800' : 'PureGray-900')}

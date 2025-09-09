@@ -13,6 +13,7 @@ export interface MenuItemProps {
     title: string;
     count: number | undefined;
     disabled: boolean;
+    isLast: boolean;
 }
 
 export const MenuItem = (props: MenuItemProps) => {
@@ -22,12 +23,12 @@ export const MenuItem = (props: MenuItemProps) => {
         <hstack
             padding="xsmall"
             border={isActive ? 'thick' : 'thin'}
-            cornerRadius="medium"
+            cornerRadius="small"
             lightBackgroundColor={isActive ? 'AlienBlue-100' : (hasCount ? 'Yellow-50' : 'PureGray-50')}
             lightBorderColor={isActive ? 'AlienBlue-700' : (hasCount ? 'Yellow-300' : 'PureGray-300')}
             darkBackgroundColor={isActive ? 'AlienBlue-800' : (hasCount ? 'Yellow-800' : 'PureGray-900')}
             darkBorderColor={isActive ? 'AlienBlue-400' : (hasCount ? 'Yellow-600' : 'PureGray-600')}
-            width="33%"
+            width={props.isLast ? '34%' : '33%'}
             alignment="middle center"
             onPress={!props.disabled ? (() => props.setActivePage(props.title)) : undefined}
         >

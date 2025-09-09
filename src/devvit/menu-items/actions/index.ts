@@ -5,11 +5,16 @@
  * License: BSD-3-Clause
  */
 
+import {Context} from "@devvit/public-api";
 import {forceApiRefreshAction} from "./forceApiRefreshAction.js";
 import {startDataUpdaterAction} from "./startDataUpdaterAction.js";
 import {stopDataUpdaterAction} from "./stopDataUpdaterAction.js";
 
-export const actionMenuActions = {
+export type TActionMenuAction = {
+    [key: string]: (ctx: Context) => Promise<void>
+};
+
+export const actionMenuActions: TActionMenuAction = {
     'Force-Api-Refresh': forceApiRefreshAction,
     'Start-Data-Updater': startDataUpdaterAction,
     'Stop-Data-Updater': stopDataUpdaterAction

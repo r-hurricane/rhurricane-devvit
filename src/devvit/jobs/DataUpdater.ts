@@ -91,7 +91,7 @@ export class DataUpdater extends JobBase {
                 const saleTime = new Date().getTime() - staleSetting * 3600000;
                 if (lastModified && new Date(lastModified).getTime() < saleTime) {
                     logger.warn(`Stale data detected! Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
-                    await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - Stale Data Detected\n\nThe data updater has detected the Summary API has become stale. Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
+                    await notifier.send(`# r/${context.subredditName} HurricaneTracker Alerts\n\n## Data Updater - Stale Data Detected\n\nTime: ${new Date().toISOString()}\n\nThe data updater has detected the Summary API has become stale. Last update was ${lastModified} which was over ${staleSetting} hours ago!`);
                     return;
                 }
 
@@ -105,7 +105,7 @@ export class DataUpdater extends JobBase {
             if (apiResult.status !== 200) {
                 const message = `Received http ${apiResult.status} ${apiResult.statusText} response from the summary API!\n\n${await apiResult.text()}`;
                 logger.error(message);
-                await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - API Call Failed\n\n${message}`);
+                await notifier.send(`# r/${context.subredditName} HurricaneTracker Alerts\n\n## Data Updater - API Call Failed\n\nTime: ${new Date().toISOString()}\n\n${message}`);
                 return;
             }
 
@@ -135,9 +135,8 @@ export class DataUpdater extends JobBase {
                 return;
             }
 
-            // Repost if at frequency
-            const didRepostAtFreq = await repostIfAtRepostFreq(logger, context);
-            if (didRepostAtFreq) return;
+            // Note: if at repost frequency, but no new "major" developments made, it will repost on next run
+            // (assuming no changes to API data gives a 304 status). See reference to repostIfAtRepostFreq above.
 
             // If there is not a previous post to compare with, skip
             if (!lastSummaryApiData) {
@@ -145,15 +144,78 @@ export class DataUpdater extends JobBase {
                 return;
             }
 
-            // Determine if there are new counts in the TWO or ATCF
-            if (newSummaryApiData.two.count > lastSummaryApiData.two.count ||
-                newSummaryApiData.atcf.count > lastSummaryApiData.atcf.count
-            )
+            // If there is a new storm designation (i.e. new Tropical Depression/Storm or Hurricane)
+            const hasNewStorm = newSummaryApiData.currentStorms.count > lastSummaryApiData.currentStorms.count;
+            if (hasNewStorm) {
+                // Find storm that is new
+                const newStorm = newSummaryApiData.currentStorms.data
+                    .find(a => !lastSummaryApiData.currentStorms.data
+                        .find(b => a.id == b.id));
+
+                const basinId = newStorm?.binNumber.substring(0, 2);
+                const basin = basinId == 'CP'
+                    ? 'Central Pacific'
+                    : (
+                        basinId == 'EP'
+                            ? 'Eastern Pacific'
+                            : 'Atlantic'
+                    );
+
+                logger.info('New API result has a current storm. Reposting!');
+                const result = await createSummaryPost(
+                    context,
+                    `${newStorm?.name} Officially Forms in the ${basin}`,
+                    'New Storm',
+                    `New Storm - ${basin}`
+                );
+                logger.info('Created new post:', result.toast.text, result.post?.id);
+                return;
+            }
+
+            // Ir there is a new TWO disturbance area, repost with New Disturbance info
+            const hasNewDisturbance = newSummaryApiData.two.count > lastSummaryApiData.two.count;
+            if (hasNewDisturbance)
             {
-                logger.info('New API result has a new storm in the TWO or ATCF. Reposting!');
-                // TODO: Add New Storm Flair
-                const result = await createSummaryPost(context);
-                logger.info('Reposted new post:', result.toast.text, result.post?.id);
+                // Find whether the new disturbance is in ALT or PAC
+                const newAlt = newSummaryApiData.two.data.basins.atlantic.areas
+                    .find(a => !lastSummaryApiData.two.data.basins.atlantic.areas
+                        .find(b => a.id == b.id));
+                const newPac = newSummaryApiData.two.data.basins.pacific.areas
+                    .find(a => !lastSummaryApiData.two.data.basins.pacific.areas
+                        .find(b => a.id == b.id));
+                const newBasin = newAlt ? 'Atlantic' : 'Pacific';
+                const newDist = newAlt ?? newPac;
+
+                logger.info('New API result has a new disturbance in the TWO. Reposting!');
+                const result = await createSummaryPost(
+                    context,
+                    `New Tropical Disturbance - ${newBasin} - ${newDist?.twoDay?.chance ?? '00'}% / ${newDist?.sevenDay?.chance ?? '00'}% - ${newDist?.title}`,
+                    'New Disturbance',
+                    `New Disturbance - ${newBasin}`
+                );
+                logger.info('Created new post:', result.toast.text, result.post?.id);
+                return;
+            }
+
+            // Repost if there is a new storm being tracked by the ATCF
+            const hasNewAtcfStorm = newSummaryApiData.atcf.count > lastSummaryApiData.atcf.count;
+            if (hasNewAtcfStorm)
+            {
+                // Find storm that is new
+                const newAtcfStorm = newSummaryApiData.atcf.data
+                    .find(a => !lastSummaryApiData.atcf.data
+                        .find(b => a.data[0].basin == b.data[0].basin && a.genNo == b.genNo));
+
+                logger.info('New API result has a new storm in the ATCF. Reposting!');
+                const result = await createSummaryPost(
+                    context,
+                    newAtcfStorm
+                        ? `New ATCF Storm - ${newAtcfStorm.data[0].basin}${newAtcfStorm.data[0].stormNo}`
+                        : 'New ATCF Storm',
+                    'New ATCF Storm',
+                    newAtcfStorm ? `New ATCF Storm - ${newAtcfStorm?.data[0].basin}` : 'New ATCF Storm'
+                );
+                logger.info('Created new post:', result.toast.text, result.post?.id);
                 return;
             }
 
@@ -166,7 +228,7 @@ export class DataUpdater extends JobBase {
                     return;
                 }
 
-                await notifier.send(`# r/Hurricane Devvit Alerts\n\n## Data Updater - General Failure\n\nAn error was encountered while processing data updates:\n\`\`\`\n${e}\n\`\`\``);
+                await notifier.send(`# r/${context.subredditName} HurricaneTracker Alerts\n\n## Data Updater - General Failure\n\nTime: ${new Date().toISOString()}\n\nAn error was encountered while processing data updates:\n\`\`\`\n${e}\n\`\`\``);
 
             } catch (e2) {
                 logger.error('Error while trying to send notification! ', e2);

@@ -11,17 +11,20 @@ import {SummaryPostMetadataDto} from "../../../shared/dtos/redis/PostMetadataDto
 import {SummaryApiDto} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos.js";
 import {SummaryApiSchema} from "./schemas/summary-api/SummaryApiSchema.js";
 import {LastNotificationDto, LastNotificationSchema} from "./schemas/LastNotificationSchema.js";
+import {UserPreferencesDto} from "../../../shared/dtos/redis/UserPreferencesDto.js";
+import {UserPreferencesSchema} from "./schemas/UserPreferencesSchema.js";
 
 export class RedisService {
 
     #redis: Devvit.Context['redis'];
 
     #redisKeys = {
-        postMetadata: (params: string) => `rhurricane:postmeta:${params[0]}`,
+        postMetadata: (postId: string) => `rhurricane:postmeta:${postId}`,
         summaryApiLastModified: () => `rhurricane:summaryapi:last_modified`,
         summaryApiData: () => `rhurricane:summaryapi:data`,
         summaryApiLastRepost: () => `rhurricane:summaryapi:last_repost`,
-        lastNotification: () => `rhurricane:notify:last`
+        lastNotification: () => `rhurricane:notify:last`,
+        userPreference: (userId: string) => `rhurricane:userpref:${userId}`
     };
 
     constructor(redis: Devvit.Context['redis']) {
@@ -32,8 +35,12 @@ export class RedisService {
     /* ===== Post Metadata ===== */
     /* ========================= */
     public async getPostMetadata(postId: string): Promise<SummaryPostMetadataDto | null> {
-        const savedJson = await this.#redis.get(this.#redisKeys.postMetadata(postId));
-        if (!savedJson) return null;
+        const savedJson = await this.#redis.get(this.#redisKeys.postMetadata(postId))
+
+        // If metadata is missing (because historical post not in Redis), assume summary
+        if (!savedJson) return {
+            type: "summary"
+        } as SummaryPostMetadataDto;
 
         const parsedJson = await PostMetadataSchema.parseAsync(JSON.parse(savedJson));
         switch (parsedJson.type) {
@@ -108,5 +115,21 @@ export class RedisService {
             time: new Date().getTime()
         } satisfies LastNotificationDto));
     }
+
+    /* ============================ */
+    /* ===== User Preferences ===== */
+    /* ============================ */
+    public async getUserPreferences(userId: string): Promise<UserPreferencesDto | null> {
+        const savedJson = await this.#redis.get(this.#redisKeys.userPreference(userId));
+        if (!savedJson) return null;
+
+        const parsedJson = await UserPreferencesSchema.parseAsync(JSON.parse(savedJson));
+        return parsedJson satisfies UserPreferencesDto;
+    }
+
+    public async saveUserPreferences(userId: string, preferences: UserPreferencesDto): Promise<string> {
+        return await this.#redis.set(this.#redisKeys.userPreference(userId), JSON.stringify(preferences));
+    }
+
 
 }

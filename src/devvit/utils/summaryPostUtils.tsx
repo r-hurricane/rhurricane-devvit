@@ -5,10 +5,10 @@
  * License: BSD-3-Clause
  */
 
-import {JobContext, Context, Toast, Post, Devvit, SettingsClient} from "@devvit/public-api";
+import {Context, Devvit, JobContext, Post, SettingsClient, Toast} from "@devvit/public-api";
 import {Logger} from "../Logger.js";
 import {RedisService} from "../redis/RedisService.js";
-import {AppSettings} from "../AppSettings.js";
+import {AppSettings, SettingsEnvironment} from "../AppSettings.js";
 
 export const allowRepost = async (logger: Logger, settings: SettingsClient, redis: RedisService): Promise<boolean> => {
 
@@ -29,9 +29,10 @@ export const allowRepost = async (logger: Logger, settings: SettingsClient, redi
     }
 
     // If last reposted date sooner than 3 hours ago, skip
+    const environment = await AppSettings.GetEnvironment(settings);
     const now = new Date().getTime();
     const rateLimit = now - (3 * 3600000);
-    if (lastRepost > rateLimit) {
+    if (environment != SettingsEnvironment.Development && lastRepost > rateLimit) {
         logger.debug('Last Repost was within 3 hours. This is the "safety period".');
         return false;
     }
@@ -54,15 +55,25 @@ export const repostIfAtRepostFreq = async (logger: Logger, jobContext: JobContex
 
     // Repost if we have reached the repost frequency
     logger.info('Last repost frequency reached. Reposting!');
-    // TODO: Add Update Flair
-    const result = await createSummaryPost(jobContext);
-    logger.info('Reposted new post:', result.toast.text, result.post?.id);
+    // TODO: Add latest TWO date/time to post title
+    const result = await createSummaryPost(jobContext,
+        'Tropical Weather Summary',
+        'Tropical Weather Outlook'
+    );
+    logger.info('Created new update post:', result.toast.text, result.post?.id);
     return true;
 };
 
 export type CreateSummaryResult = { toast: Toast, post?: Post };
 
-export const createSummaryPost = async (context: Context | JobContext): Promise<CreateSummaryResult> => {
+export const createSummaryPost =
+    async (
+        context: Context | JobContext,
+        title: string,
+        flairName?: string | undefined,
+        flairText?: string | undefined
+    ): Promise<CreateSummaryResult> =>
+{
     // Create logger
     const logger = await Logger.Create('Create Summary Post', context.settings);
 
@@ -79,15 +90,26 @@ export const createSummaryPost = async (context: Context | JobContext): Promise<
             };
         }
 
+        // If a post flair was given, find flair by name
+        let flairId: string | undefined = undefined;
+        if (flairName) {
+            const postFlairs = await context.reddit.getPostFlairTemplates(context.subredditName);
+            flairId = postFlairs.find(f => f.text == flairName)?.id;
+            if (!flairId)
+                logger.warn(`Unable to find flair named ${flairName}, therefore no post flair will be added.`);
+            else
+                logger.debug(`Attaching flair ${flairName} (${flairId}) with text \"${flairText}\"`);
+        }
+
         // Submit the new post
         const post = await context.reddit.submitPost({
-            title: 'Tropical Weather Summary',
+            title: title,
             subredditName: context.subredditName,
             textFallback: {
                 text: 'Interactive posts are unsupported on old.reddit or older app versions.'
             },
-            // TODO: flairId: flairId,
-            // TODO: flairText: flairText,
+            flairId: flairId,
+            flairText: flairId ? (flairText ? flairText : flairName) : undefined,
             preview: (
                 <zstack width="100%" height="100%" alignment="center middle">
                     <vstack width="100%" height="100%" alignment="center middle">
@@ -112,6 +134,16 @@ export const createSummaryPost = async (context: Context | JobContext): Promise<
         // Save post type to redis
         const redis = new RedisService(context.redis);
         await redis.savePostMetadata(post.id, { type: 'summary' });
+
+        // Confirm post flair set
+        if (flairId) {
+            await context.reddit.setPostFlair({
+                subredditName: context.subredditName,
+                postId: post.id,
+                flairTemplateId: flairId,
+                text: flairText ?? flairName
+            });
+        }
 
         // Save Last Posted date/time as now
         await redis.saveSummaryApiLastReposted(new Date().getTime());
