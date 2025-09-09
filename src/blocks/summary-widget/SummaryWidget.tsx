@@ -138,11 +138,6 @@ export const SummaryWidget = (props: SummaryWidgetProps) => {
                 <hstack width="100%" height="1px" lightBackgroundColor="PureGray-300" darkBackgroundColor="PureGray-700" />
                 <hstack width="100%" padding="small" lightBackgroundColor="Global-White" darkBackgroundColor="Global-Black">
                     <hstack width="33%" alignment="middle start">
-                        {/*<hstack padding="small" border="thin" alignment="middle start" darkBackgroundColor="Yellow-800" lightBackgroundColor="Yellow-50" cornerRadius="full" onPress={() => {setShowDisclaim(true)}}>
-                            <icon name="info" darkColor="Yellow-50" lightColor="Yellow-800" size="small" />
-                            <spacer size="small" />
-                            <text>Disclaimer</text>
-                        </hstack>*/}
                         <button size="small" icon="info" onPress={() => {setShowDisclaim(true)}}>
                             {`\xa0Disclaimer`}
                         </button>

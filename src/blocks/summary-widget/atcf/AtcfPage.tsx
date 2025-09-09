@@ -113,7 +113,7 @@ const AtcfStormWidget = (props: AtcfStormProps) => {
                         <spacer size="small" />
                         {pRow(c.date, 'Updated', getDate(c.date))}
                         {pRow(c.lat, 'Pos', `${lat.toFixed(1)}${lat > 0 ? 'N' : 'S'} ${lon.toFixed(1)}${lon > 0 ? 'E' : 'W'}`)}
-                        {pRow(c.maxSusWind, 'Wind', `${speed(c.maxSusWind)}${p(' / ', speed(c.windGust))}${p(' @ ', dist(c.maxWindRad))}`)}
+                        {pRow(c.maxSusWind, 'Wind', `${speed(c.maxSusWind)}${p(' / ', !c.windGust ? null : speed(c.windGust))}${p(' @ ', dist(c.maxWindRad))}`)}
                         {pRow(c.minSeaLevelPsur, 'Psur', `${c.minSeaLevelPsur}mb${p(' - ', c.outerPsur, 'mb')}${p(' @ ', dist(c.outerRad))}`)}
                         {pRow(c.depth, 'Depth', `${c.depth}`)}
                         {pRow(c.windRad?.rad, 'Wind Radi', speed(c.windRad?.rad) ?? '--')}
