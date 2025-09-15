@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "rhurricane",
+  "permissions": {
+    "redis": true,
+    "reddit": {
+      "enable": true
+    },
+    "http": {
+      "domains": ["rhurricane.net", "dev.rhurricane.net"]
+    }
+  },
+  "media": {
+    "dir": "assets"
+  },
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "entry": "index.html",
+        "height": "tall",
+        "inline": true
+      }
+    }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "forms": {
+    "actionMenu": "/internal/form/action-menu"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "RHurricane Actions",
+        "description": "r/Hurricane",
+        "endpoint": "/internal/menu/action-menu",
+        "forUserType": "moderator",
+        "location": "subreddit"
+      }
+    ]
+  },
+  "scheduler": {
+    "tasks": {
+      "data-updater": {
+        "endpoint": "/internal/job/data-updater",
+        "cron": "*/1 * * * *"
+      }
+    }
+  },
+  "triggers": {
+    "onAppInstall": "/internal/trigger/install",
+    "onAppUpgrade": "/internal/trigger/update"
+  },
+  "dev": {
+    "subreddit": "beachbrewsboil"
+  }
+}
