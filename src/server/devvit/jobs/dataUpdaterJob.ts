@@ -190,6 +190,11 @@ export const runDataUpdater = async () => {
             const newBasin = newAlt ? 'Atlantic' : 'Pacific';
             const newDist = newAlt ?? newPac;
 
+            if (!newDist) {
+                logger.warn('A new ')
+                return;
+            }
+
             logger.info('New API result has a new disturbance in the TWO. Reposting!');
             const result = await createSummaryPost(
                 `New Tropical Disturbance - ${newBasin} - ${newDist?.twoDay?.chance ?? '00'}% / ${newDist?.sevenDay?.chance ?? '00'}% - ${newDist?.title}`,
@@ -237,7 +242,7 @@ export const runDataUpdater = async () => {
         } catch (e2) {
             logger.error('Error while trying to send notification! ', e2);
         }
+    } finally {
+        logger.traceEnd();
     }
-
-    logger.traceEnd();
 };

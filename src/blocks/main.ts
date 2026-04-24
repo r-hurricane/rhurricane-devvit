@@ -168,4 +168,7 @@ Devvit.addSettings([
     }
 ]);
 
+Devvit.addMenuItem({
+
+})
 export default Devvit;

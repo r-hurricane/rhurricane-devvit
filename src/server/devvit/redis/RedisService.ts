@@ -31,7 +31,7 @@ export class RedisService {
     }
 
     public async setRunDataUpdater(enable: boolean): Promise<void> {
-        await redis.set(this.#redisKeys.summaryApiLastModified(), enable ? 'true' : 'false');
+        await redis.set(this.#redisKeys.runDataUpdater(), enable ? 'true' : 'false');
     }
 
     /* ================================= */

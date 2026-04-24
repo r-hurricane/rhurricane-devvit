@@ -8,6 +8,7 @@
 import {Logger} from "../../../util/Logger";
 import {Response} from "express";
 import {RedisService} from "../../redis/RedisService";
+import {forceDataUpdater} from "../../jobs/dataUpdaterJob";
 
 export const enableDataUpdaterAction = async (res: Response) => {
 
@@ -18,6 +19,7 @@ export const enableDataUpdaterAction = async (res: Response) => {
     try {
         const redis = new RedisService();
         await redis.setRunDataUpdater(true);
+        await forceDataUpdater();
 
         res.status(200).json({
             showToast: {

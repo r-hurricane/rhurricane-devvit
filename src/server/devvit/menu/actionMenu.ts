@@ -11,22 +11,18 @@ import { Logger } from "../../util/Logger";
 import { isMod } from "../../util/userUtils";
 import { actionMenuActions } from "./actions";
 
-const formFields = {
-    fields: [
-        {
-            name: 'action',
-            label: 'Action',
-            type: 'select',
-            options: Object.keys(actionMenuActions)
-                .map(k => ({
-                    label: k.replace(/-/g, ' '),
-                    value: k
-                }))
-        },
-    ],
-    title: 'Select Action',
-    acceptLabel: 'Perform Action'
-};
+const formFields = [
+    {
+        name: 'action',
+        label: 'Action',
+        type: 'select',
+        options: Object.keys(actionMenuActions)
+            .map(k => ({
+                label: k.replace(/-/g, ' '),
+                value: k
+            }))
+    },
+];
 
 export const ACTION_MENU_PATH = '/internal/menu/action-menu';
 
@@ -51,6 +47,8 @@ export const registerActionMenu: PathFactory = (router: Router) => {
             res.status(200).json({
                 showForm: {
                     name: 'actionMenu',
+                    title: 'Select Action',
+                    acceptLabel: 'Perform Action',
                     form: { fields: formFields }
                 }
             });
