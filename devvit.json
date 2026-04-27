@@ -1,0 +1,176 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "rhurricane",
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "inline": true,
+        "entry": "landing.html",
+        "height": "tall"
+      },
+      "dashboard": {
+        "entry": "dashboard.html"
+      }
+    }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "permissions": {
+    "reddit": true,
+    "redis": true,
+    "http": {
+      "enable": true,
+      "domains": [
+        "rhurricane.net",
+        "dev.rhurricane.net"
+      ]
+    }
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "RHurricane - Tracker Actions",
+        "description": "r-hurricane",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menus/tracker-actions"
+      }
+    ]
+  },
+  "forms": {
+    "tracker-actions": "/internal/forms/tracker-actions"
+  },
+  "triggers": {
+    "onAppInstall": "/internal/triggers/on-app-install",
+    "onAppUpgrade": "/internal/triggers/on-app-upgrade"
+  },
+  "scheduler": {
+    "tasks": {
+      "data-updater": "/internal/jobs/data-updater"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
+  },
+  "dev": {
+    "subreddit": "beachbrewsboil"
+  },
+  "settings": {
+    "subreddit": {
+      "rhurricane-environment": {
+        "type": "select",
+        "label": "Data Environment",
+        "helpText": "Production uses live data from the National Hurricane Center. Development uses test data.",
+        "options": [
+          {
+            "label": "Production",
+            "value": "Production"
+          },
+          {
+            "label": "Development",
+            "value": "Development"
+          }
+        ],
+        "defaultValue": "Production"
+      },
+      "summary-update-freq": {
+        "type": "number",
+        "label": "Data Check Frequency (min)",
+        "helpText": "How frequently to check for updates on the summary API.",
+        "defaultValue": 1,
+        "validationEndpoint": "/internal/settings/validate-summary-update-freq"
+      },
+      "summary-stale-hours": {
+        "type": "number",
+        "label": "Data API Stale Time (hr)",
+        "helpText": "When to consider the summary API data to be outdated and not displayed.",
+        "defaultValue": 12,
+        "validationEndpoint": "/internal/settings/validate-summary-stale-hours"
+      },
+      "automate-posts": {
+        "type": "boolean",
+        "label": "Enable Post Automation",
+        "helpText": "Whether to allow the app to automatically create a post. Either when there are significant changes, or (if enabled below) periodically when there are no new changes.",
+        "defaultValue": false
+      },
+      "automate-repost-freq": {
+        "type": "number",
+        "label": "Repost Freq (hr)",
+        "helpText": "How frequently to repost if no significant changes. Must be Six (6) or greater. Zero (0) disables this feature.",
+        "defaultValue": 0,
+        "validationEndpoint": "/internal/settings/validate-automate-repost-freq"
+      },
+      "maintenance-mode": {
+        "type": "select",
+        "label": "Maintenance Mode",
+        "helpText": "Whether to enable or disable maintenance mode. Soft displays an announcement and the app is usable. Hard only displays the message and (X) icon.",
+        "options": [
+          {
+            "label": "Off",
+            "value": "Off"
+          },
+          {
+            "label": "Soft",
+            "value": "Soft"
+          },
+          {
+            "label": "Hard",
+            "value": "Hard"
+          }
+        ],
+        "defaultValue": "Off"
+      },
+      "maintenance-mode-message": {
+        "type": "string",
+        "label": "Custom Maintenance Message",
+        "helpText": "A message to display when maintenance is enabled.",
+        "defaultValue": ""
+      },
+      "log-level": {
+        "type": "select",
+        "label": "Log Level",
+        "helpText": "Controls the level of log messages for performance.",
+        "options": [
+          {
+            "label": "Error",
+            "value": "Error"
+          },
+          {
+            "label": "Warn",
+            "value": "Warn"
+          },
+          {
+            "label": "Info",
+            "value": "Info"
+          },
+          {
+            "label": "Debug",
+            "value": "Debug"
+          },
+          {
+            "label": "Trace",
+            "value": "Trace"
+          }
+        ],
+        "defaultValue": "Warn"
+      },
+      "discord-noti-url": {
+        "type": "string",
+        "label": "Discord Notification URL",
+        "helpText": "A Discord channel webhook URL to send alerts to.",
+        "validationEndpoint": "/internal/settings/validate-discord-noti-url"
+      },
+      "noti-silence": {
+        "type": "number",
+        "label": "Notification Silence (min)",
+        "helpText": "How long to silence the same notification sent to Discord.",
+        "defaultValue": 30,
+        "validationEndpoint": "/internal/settings/validate-noti-silence"
+      }
+    }
+  }
+}

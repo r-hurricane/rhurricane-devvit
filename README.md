@@ -1,84 +1,27 @@
-﻿# r/Hurricane App
-This app is specifically to be used on r/Hurricane. It automatically updates various parts of the
-subreddit with the latest tropical weather data from the National Hurricane Center and/or National
-Weather Service.
+## Devvit React Starter
 
-I have decided to leave the r/hurricane app unlisted and only allowed in the r/Hurricane and
-r/HurricaneTracker subs moderated by me, mostly due to the "future plans" I plan to build into the
-app that focus solely on enhancing the experience of these two subs specifically! I may team with
-the r/TropicalWeather team in the future, which may utilize similar items. Additionally, the
-"data disclaimer" is also a concern. I would like to prevent spread of "misinformation" due to
-either inaccurate data (due to bugs) or because individuals on other subs not understanding the data
-presented (such as the Automatic Tropical Cyclone Forecast).
+A starter to build web applications on Reddit's developer platform
 
-## Interactive Posts
-This app currently provides a single interactive post type:
+- [Devvit](https://developers.reddit.com/): A way to build and deploy immersive games on Reddit
+- [Vite](https://vite.dev/): For compiling the webView
+- [React](https://react.dev/): For UI
+- [Hono](https://hono.dev/): For backend logic
+- [Tailwind](https://tailwindcss.com/): For styles
+- [TypeScript](https://www.typescriptlang.org/): For type safety
 
-### Tropical Weather Outlook (TWO) Posts
-Provides a custom interactive post type to be used as a pinned post where the community can easily
-find the latest Tropical Weather Outlooks, Automatic Tropical Cyclone Forecasts, and Tropical
-Cyclone Plan of the Days. Expected to be a pinned post, with occasionally reposted for visibility on
-feeds. Frequency of reposts yet to be determined and are manual. Wish to discuss this with the
-Devvit community then the r/Hurricane mod team.
+## Getting Started
 
-### FUTURE - Storm Summary Posts
-As the year progresses, I would like to develop an interactive post experience around active named 
-storms. This would then also act as our "mega-thread" for providing helpful information along with
-post-storm coverage.
+> Make sure you have Node 22 downloaded on your machine before running!
 
-### FUTURE - Recon Mission Data Posts
-The journey to develop a simple sidebar widget showing the recon flight schedule (which is not
-"easily" displayed anywhere I know of) and provide the r/Hurricane sub a place to review recon data
-in realtime has lead me to the app today. However, I still have a goal to provide a custom post type
-around the realtime display and have an interactive experience with recon data!
+1. Run `npm create devvit@latest --template=react`
+2. Go through the installation wizard. You will need to create a Reddit account and connect it to Reddit developers
+3. Copy the command on the success page into your terminal
 
-## Settings
-There are a few different settings to help control aspects of the app:
-1. Data Environment - Production uses live data from the National Hurricane Center. Development uses
-   the test data API. Default: Production
-2. Data Check Frequency (min) - How frequently to check for updates on the summary API.
-   Default: 1 min
-3. Data API Stale Time (hr) - When to consider the summary API data to be outdated and not displayed
-   Default: 12 hours
-4. Enable Post Automation - Whether to allow the app to automatically create a post. Either when 
-   there are significant changes, or (if enabled below) periodically when there are no new changes.
-5. Repost Freq (hr) - How frequently to repost if no significant changes. Must be Six (6) or
-   greater. Zero (0) disables this feature.',
-6. Log Level - Controls the level of logging by the app. Default: Warn
-7. Discord Notification URL - (Optional) A Discord channel webhook URL to send alerts to. Must be a
-   Discord webhook URL
-8. Notification Silence (min) - How long to silence the same notification sent to Discord.
-   Default: 30
+## Commands
 
-## Menu Items
-This app has a few different menu items to control the data update scheduled job, and to post the
-interactive post types.
-
-* **Subreddit Menu > RHurricane - Start Data Updater**  
-This menu allows mods to start the data updater scheduled job, which starts various update processes.
-
-* **Subreddit Menu > RHurricane - Stop Data Updater**  
-This menu allows mods to stop the data updater scheduled job.
-
-* **Subreddit Menu > RHurricane - Create Summary Post**  
-Allows mods to create a new Tropical Weather Outlook (TWO) Interactive Post.
-
-## Future Plans
-There are a number of plans for enhancing and adding to this app as the hurricane season progresses:
-* Interactive Post Types
-  * Add WebView to TWO
-  * Add Storm Summary posts
-  * Add Recon Data posts
-* Various community automations
-  * Update sidebar widget text with TWO + Recon (new and old reddit)
-  * Update community style or "event mode" (need more training on this)
-    * Ideally, enforce stricter rules during "storm times"
-  * Update community status / emoji (not yet supported by Devvit)
-  * Automated mega-thread creation / enforcement after storms dissipate
-  * Would be awesome to analyse image posts for rule-breaking images (i.e. no clear 
-    date/coordinates, known common troll posts, etc.)
-  * Other various mod pain-points, specific to r/Hurricane (if any)
-
-## Change Log
-* 0.1.0 - Initial BETA release
-* 0.1.1 - Basic post automation + bugfix for menu items
+- `npm run dev`: Starts a development server where you can develop your application live on Reddit.
+- `npm run build`: Builds your client and server projects
+- `npm run deploy`: Uploads a new version of your app
+- `npm run launch`: Publishes your app for review
+- `npm run login`: Logs your CLI into Reddit
+- `npm run type-check`: Type checks, lints, and prettifies your app
