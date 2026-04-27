@@ -15,7 +15,7 @@ import {actionMenuActions} from "../actions";
 export const menus = new Hono();
 
 menus.post('/tracker-actions', async (c) => {
-    const logger = new Logger('Menu - Tracker Actions');
+    const logger = await Logger.Create('Menu - Tracker Actions');
 
     try {
         // Confirm user is mod

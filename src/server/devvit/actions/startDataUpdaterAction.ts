@@ -5,6 +5,8 @@
 * License: BSD-3-Clause
 */
 
-export const startDataUpdaterAction = async () => {
+import {enableDataUpdate} from "../jobs/dataUpdater";
 
+export const startDataUpdaterAction = async () => {
+    await enableDataUpdate();
 };

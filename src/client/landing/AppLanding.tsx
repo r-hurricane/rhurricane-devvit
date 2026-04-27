@@ -8,7 +8,7 @@
 export const AppLanding = () => {
     return (
         <div>
-            <h1>Hello landing!</h1>
+            <h1 className="border border-red-500 p-2 text-berrypurple-500">Hello landing!</h1>
         </div>
     );
 };

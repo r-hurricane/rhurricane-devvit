@@ -1,18 +1,14 @@
-export type InitResponse = {
-  type: 'init';
-  postId: string;
-  count: number;
-  username: string;
+import {SummaryApiDto} from "./dtos/redis/summary-api/SummaryApiDtos";
+import {UserPreferencesDto} from "./dtos/redis/UserPreferencesDto";
+
+export type ApiErrorResponse = {
+  error: string;
 };
 
-export type IncrementResponse = {
-  type: 'increment';
-  postId: string;
-  count: number;
-};
-
-export type DecrementResponse = {
-  type: 'decrement';
-  postId: string;
-  count: number;
+export type LandingInitResponse = {
+  isDev: boolean;
+  summaryApiData: SummaryApiDto | null;
+  maintenanceMode: string;
+  maintenanceMessage: string | null;
+  userPreferences: UserPreferencesDto | null;
 };

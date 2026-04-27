@@ -9,6 +9,7 @@ import {Logger} from "./Logger";
 import {AppSettings, SettingsEnvironment} from "./AppSettings";
 import {context, reddit} from "@devvit/web/server";
 import {UiResponse} from "@devvit/web/shared";
+import * as trackerRedis from "../devvit/redis/trackerRedis";
 
 export const allowRepost = async (logger: Logger): Promise<boolean> => {
 
@@ -59,7 +60,7 @@ export const repostIfAtRepostFreq = async (logger: Logger): Promise<boolean> => 
         'Tropical Weather Summary',
         'Tropical Weather Outlook'
     );
-    logger.info('Created new update post:', result.toast.text, result.post?.id);
+    logger.info('Created new update post:', result.showToast, result.navigateTo);
     return true;
 };
 
@@ -79,7 +80,7 @@ export const createSummaryPost =
         if (!context.subredditName) {
             logger.error('Context was missing Subreddit Name?!?');
             return {
-                toast: {
+                showToast: {
                     text: 'ERROR: Context was missing the Subreddit Name? Shouldn\' happen...',
                     appearance: 'neutral'
                 }
@@ -94,7 +95,7 @@ export const createSummaryPost =
             if (!flairId)
                 logger.warn(`Unable to find flair named ${flairName}, therefore no post flair will be added.`);
             else
-                logger.debug(`Attaching flair ${flairName} (${flairId}) with text \"${flairText}\"`);
+                logger.debug(`Attaching flair ${flairName} (${flairId}) with text "${flairText}"`);
         }
 
         // Submit the new post
@@ -102,7 +103,7 @@ export const createSummaryPost =
             title: title,
             subredditName: context.subredditName,
             textFallback: {
-                text: 'Interactive posts are unsupported on old.reddit or older app versions.'
+                text: 'Interactive posts are not supported on old.reddit or older app versions.'
             },
             postData: { type: 'summary' },
             flairId: flairId,

@@ -13,7 +13,7 @@ import {executeDataUpdate} from "./dataUpdater";
 export const jobs = new Hono();
 
 jobs.post('/data-updater', async (c) => {
-    const logger = new Logger('Jobs - Data Updater');
+    const logger = await Logger.Create('Jobs - Data Updater');
 
     try {
 

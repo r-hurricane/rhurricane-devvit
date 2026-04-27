@@ -5,6 +5,8 @@
 * License: BSD-3-Clause
 */
 
-export const stopDataUpdaterAction = async () => {
+import {disableDataUpdate} from "../jobs/dataUpdater";
 
+export const stopDataUpdaterAction = async () => {
+    await disableDataUpdate();
 };

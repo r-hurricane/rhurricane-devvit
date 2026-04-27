@@ -13,13 +13,13 @@ import {isMod} from "../../util/userUtils";
 import {context} from "@devvit/web/server";
 
 type ApplicationFormValues = {
-    action?: string;
+    action: string[];
 };
 
 export const forms = new Hono();
 
 forms.post('/tracker-actions', async (c) => {
-    const logger = new Logger('Form - Tracker Actions');
+    const logger = await Logger.Create('Form - Tracker Actions');
     let action = '<unknown>';
 
     try {
@@ -39,8 +39,8 @@ forms.post('/tracker-actions', async (c) => {
 
         // Get the action form value
         const values = await c.req.json<ApplicationFormValues>();
-        action = typeof values.action === 'string' ? values.action.trim() : '';
-        logger.warn(`User ${context.userId} - ${context.username} has requested action ${action}.`);
+        action = values.action && values.action[0] && typeof values.action[0] === 'string' ? values.action[0].trim() : '';
+        logger.info(`User ${context.userId} - ${context.username} has requested action ${action}.`);
 
         // Confirm action exists
         const actionMethod = !!action && Object.hasOwn(actionMenuActions, action)
@@ -71,7 +71,7 @@ forms.post('/tracker-actions', async (c) => {
         logger.error(`Error processing action: `, action, error);
         return c.json<UiResponse>(
             {
-                showToast: { text: 'ERROR: Failed to show action form', appearance: 'neutral' }
+                showToast: { text: 'ERROR: Failed to perform action.', appearance: 'neutral' }
             },
             500
         );

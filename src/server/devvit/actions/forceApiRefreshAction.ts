@@ -7,9 +7,10 @@
 
 import {Logger} from "../../util/Logger";
 import {executeDataUpdate} from "../jobs/dataUpdater";
+import * as trackerRedis from "../redis/trackerRedis";
 
 export const forceApiRefreshAction = async () => {
-    const logger = new Logger('Action - Force ApiRefresh');
+    const logger = await Logger.Create('Action - Force ApiRefresh');
 
     // Clear last modified date from redis
     await trackerRedis.saveSummaryApiLastModified('');

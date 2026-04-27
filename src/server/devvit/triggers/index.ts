@@ -8,17 +8,25 @@
 import {Hono} from 'hono';
 import type {OnAppInstallRequest, TriggerResponse} from '@devvit/web/shared';
 import {Logger} from "../../util/Logger";
+import {isDataUpdaterJobEnabled} from "../redis/trackerRedis";
+import {enableDataUpdate} from "../jobs/dataUpdater";
+import {forceApiRefreshAction} from "../actions/forceApiRefreshAction";
 
 export const triggers = new Hono();
 
-// TODO: Trigger forced API Update
+const onAppUpdateOrInstall = async () => {
+    if (!(await isDataUpdaterJobEnabled())) return;
+    await enableDataUpdate();
+    await forceApiRefreshAction();
+};
 
 triggers.post('/on-app-install', async (c) => {
     const logger = await Logger.Create('App Install');
 
     try {
-        const input = await c.req.json<OnAppInstallRequest>();
+        await onAppUpdateOrInstall();
 
+        const input = await c.req.json<OnAppInstallRequest>();
         return c.json<TriggerResponse>(
             {
                 status: 'success',
@@ -42,8 +50,9 @@ triggers.post('/on-app-upgrade', async (c) => {
     const logger = await Logger.Create('App Upgrade');
 
     try {
-        const input = await c.req.json<OnAppInstallRequest>();
+        await onAppUpdateOrInstall();
 
+        const input = await c.req.json<OnAppInstallRequest>();
         return c.json<TriggerResponse>(
             {
                 status: 'success',
