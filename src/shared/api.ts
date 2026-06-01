@@ -8,7 +8,7 @@ export type ApiErrorResponse = {
 export type LandingInitResponse = {
   isDev: boolean;
   summaryApiData: SummaryApiDto | null;
-  maintenanceMode: string;
+  maintenanceMode: 'Off' | 'Soft' | 'Hard';
   maintenanceMessage: string | null;
   userPreferences: UserPreferencesDto | null;
 };

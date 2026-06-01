@@ -35,7 +35,7 @@ landing.get('/init', async (c) => {
 
         // Get whether is the development data environment or not
         const isDev = (await AppSettings.GetEnvironment()) !== SettingsEnvironment.Production;
-        const maintenanceMode = MaintenanceLevel[await AppSettings.GetMaintenanceMode()];
+        const maintenanceMode = MaintenanceLevel[await AppSettings.GetMaintenanceMode()] as LandingInitResponse['maintenanceMode'];
         const maintenanceMessage = await AppSettings.GetMaintenanceModeMessage();
 
         // Fetch the actual summary data!
@@ -47,6 +47,7 @@ landing.get('/init', async (c) => {
             : null;
 
         return c.json<LandingInitResponse>({ isDev, summaryApiData, maintenanceMode, maintenanceMessage, userPreferences }, 200);
+
     } catch (error) {
         logger.error('Error with init API: ', error);
         return c.json<ApiErrorResponse>({error: 'Error getting outlook data'}, 500);
