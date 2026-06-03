@@ -5,7 +5,7 @@
 * License: BSD-3-Clause
 */
 
-import {PageHeading} from "../PageHeading";
+import {PageHeading} from "../general/PageHeading";
 import {LuRadar} from "react-icons/lu";
 import {OutlookCard} from "./OutlookCard";
 import {NoFormation} from "./NoFormation";
@@ -13,6 +13,7 @@ import {TwoData} from "../../../shared/dtos/redis/summary-api/SummaryApiTwoDtos"
 import {SummaryApiData} from "../../../shared/dtos/redis/summary-api/SummaryApiDtos";
 import {LoadingOrError} from "../../shared/LoadingOrError";
 import {ErrorBoundary} from "react-error-boundary";
+import {formatDate} from "../../shared/formatDate";
 
 export const TwoPage = ({
     twoData
@@ -25,7 +26,7 @@ export const TwoPage = ({
                 <PageHeading
                     Icon={LuRadar}
                     heading="Tropical Weather Outlook (TWO)"
-                    subHeading="2026-05-30 00z"
+                    subHeading={formatDate(twoData.data.basins.atlantic.issuedOn?.time)}
                 />
                 <h2 className="mt-2 font-semibold text-neutral-content-strong uppercase">Atlantic</h2>
                 {twoData.data.basins.atlantic.areas.length > 0

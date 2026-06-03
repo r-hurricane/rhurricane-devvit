@@ -6,7 +6,7 @@
  */
 
 import {createPortal} from "react-dom";
-import {useLandingContext} from "./LandingContext";
+import {useLandingContext} from "../LandingContext";
 
 export const ModalHost = () => {
     const {modal} = useLandingContext();

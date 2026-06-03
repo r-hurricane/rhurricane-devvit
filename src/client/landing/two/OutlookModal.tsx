@@ -23,7 +23,7 @@ export const OutlookModal = ({
     };
     return (
         <div
-            className="z-50 fixed inset-0 w-full h-full flex justify-center items-center bg-black/50"
+            className="z-50 fixed inset-0 w-full h-full flex justify-center items-center bg-black/70"
             onClick={closeModal}
         >
             <div
@@ -47,7 +47,7 @@ export const OutlookModal = ({
                     </div>
                     {/*TODO: Graphics*/}
                     {/*<div className="w-full h-25 min-h-25"></div>*/}
-                    <div className={`flex-1 min-h-0 p-2`}>
+                    <div className={`flex-1 min-h-0 p-2 rounded-md bg-white dark:bg-puregray-950`}>
                         {area.text}
                     </div>
                 </div>

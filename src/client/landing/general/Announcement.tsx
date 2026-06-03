@@ -1,5 +1,5 @@
 ﻿/*!
- * Helper for rendering consistent "Announcement" content blocks.
+ * Announcement message area.
  *
  * Author: u/Beach-Brews
  * License: BSD-3-Clause
@@ -7,12 +7,13 @@
 
 import React from "react";
 
-export interface AnnouncementProps {
+export const Announcement = ({
+    colorScheme,
+    children
+}: {
     colorScheme?: string | undefined;
     children: React.ReactNode;
-}
-
-export const Announcement = ({colorScheme, children}: AnnouncementProps) => {
+}) => {
     let style = 'border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900';
     switch (colorScheme?.toLowerCase()) {
         case 'red':
