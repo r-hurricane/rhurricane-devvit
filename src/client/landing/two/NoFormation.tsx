@@ -9,8 +9,8 @@ import {HiMiniCheckCircle} from "react-icons/hi2";
 
 export const NoFormation = () => {
     return (
-        <div className="w-full p-2 flex items-center gap-2 rounded-md border-1 border-lime-200 dark:border-lime-700 bg-lime-50 dark:bg-lime-950">
-            <div className="text-lime-500">
+        <div className="w-full p-2 flex items-center gap-2 rounded-md border-1 border-puregray-200 dark:border-puregray-700 bg-puregray-50 dark:bg-puregray-900">
+            <div className="text-puregray-500">
                 <HiMiniCheckCircle className="size-6" />
             </div>
             <div>

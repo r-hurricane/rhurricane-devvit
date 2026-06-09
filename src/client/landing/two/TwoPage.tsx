@@ -18,8 +18,15 @@ import {formatDate} from "../../shared/formatDate";
 export const TwoPage = ({
     twoData
 }: {
-    twoData: SummaryApiData<TwoData>
+    twoData: SummaryApiData<TwoData> | undefined
 }) => {
+    if (!twoData) {
+        return (
+            <div className="flex flex-col gap-1">
+                Failed to load the Tropical Weather Outlook (TWO).
+            </div>
+        );
+    }
     return (
         <ErrorBoundary fallback={<LoadingOrError error={true} />} onError={console.error}>
             <div className="flex flex-col gap-1">

@@ -8,11 +8,13 @@ import { menus } from './devvit/menus';
 import { triggers } from './devvit/triggers';
 import { jobs } from './devvit/jobs';
 import { settings } from './devvit/settings';
+import {prefs} from "./api/prefs";
 
 const app = new Hono();
 
 const api = new Hono();
 api.route('/landing', landing);
+api.route('/prefs', prefs);
 api.route('/dashboard', dashboard);
 app.route('/api', api);
 

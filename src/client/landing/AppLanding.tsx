@@ -17,6 +17,7 @@ import {Footer} from "./Footer";
 import {ButtonGroup, ButtonGroupOption} from "./general/ButtonGroup";
 import {AtcfPage} from "./atcf/AtcfPage";
 import {CurrentStorm} from "./general/CurrentStorm";
+import {TcpodPage} from "./tcpod/TcpodPage";
 
 type AppTab = 'two' | 'atcf' | 'tcpod';
 
@@ -94,10 +95,9 @@ export const AppLanding = () => {
                         {announcement}
                         {currentStorms}
                         <ButtonGroup options={tabOptions} selected={activeTab} onSelect={setActiveTab}/>
-                        {activeTab === 'two' && data?.summaryApiData?.two && (
-                            <TwoPage key="twoPage" twoData={data.summaryApiData.two}/>)}
-                        {activeTab === 'atcf' && data?.summaryApiData?.atcf && (
-                            <AtcfPage key="atcfPage" atcfData={data.summaryApiData.atcf}/>)}
+                        {activeTab === 'two' && (<TwoPage key="twoPage" twoData={data.summaryApiData?.two}/>)}
+                        {activeTab === 'atcf' && (<AtcfPage key="atcfPage" atcfData={data.summaryApiData?.atcf}/>)}
+                        {activeTab === 'tcpod' && (<TcpodPage key="tcpodPage" tcpodData={data.summaryApiData?.tcpod}/>)}
                     </div>
                     <Footer/>
                 </div>

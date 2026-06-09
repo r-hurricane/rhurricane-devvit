@@ -158,7 +158,7 @@
     --color-kiwigreen-900: var(--kiwigreen-900);
     --color-kiwigreen-950: var(--kiwigreen-950);
 
-    --color-lime-50: var(--lime-50);
+/*    --color-lime-50: var(--lime-50);
     --color-lime-100: var(--lime-100);
     --color-lime-200: var(--lime-200);
     --color-lime-300: var(--lime-300);
@@ -168,7 +168,7 @@
     --color-lime-700: var(--lime-700);
     --color-lime-800: var(--lime-800);
     --color-lime-900: var(--lime-900);
-    --color-lime-950: var(--lime-950);
+    --color-lime-950: var(--lime-950);*/
 
     --color-yellow-50: var(--yellow-50);
     --color-yellow-100: var(--yellow-100);
@@ -515,7 +515,7 @@ html {
     --kiwigreen-900: #0d2005;
     --kiwigreen-950: #081404;
 
-    --lime-50: #e0f8c8;
+/*    --lime-50: #e0f8c8;
     --lime-100: #b7f28e;
     --lime-200: #90da58;
     --lime-300: #6dbf01;
@@ -525,7 +525,7 @@ html {
     --lime-700: #2a5000;
     --lime-800: #1e3702;
     --lime-900: #151e05;
-    --lime-950: #0d1304;
+    --lime-950: #0d1304;*/
 
     --yellow-50: #fff3c0;
     --yellow-100: #ffe284;

@@ -29,7 +29,7 @@ export const OutlookModal = ({
             <div
                 className={`relative w-[calc(100vw-16px)] max-h-[calc(100vh-40px)] min-h-[200px] 
                 flex flex-col justify-between rounded-md
-                ${style.background}
+                bg-white dark:bg-puregray-950
                 border-1 ${style.border}
                 text-xs
                 `}
@@ -38,7 +38,7 @@ export const OutlookModal = ({
                     <HiXMark className="size-6" />
                 </button>
                 <div className="h-full flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                    <div className={`p-2 border-b ${style.border}`}>
+                    <div className={`p-2 border-b ${style.border} ${style.background}`}>
                         <div className={style.text}>
                             <strong>{Math.floor(area.twoDay?.chance ?? 0)}%</strong> (48h) |&nbsp;
                             <strong>{Math.floor(area.sevenDay?.chance ?? 0)}%</strong> (7d)
@@ -47,7 +47,7 @@ export const OutlookModal = ({
                     </div>
                     {/*TODO: Graphics*/}
                     {/*<div className="w-full h-25 min-h-25"></div>*/}
-                    <div className={`flex-1 min-h-0 p-2 rounded-md bg-white dark:bg-puregray-950`}>
+                    <div className={`flex-1 min-h-0 p-2 rounded-md`}>
                         {area.text}
                     </div>
                 </div>

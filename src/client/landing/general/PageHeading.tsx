@@ -21,7 +21,7 @@ export const PageHeading = ({
             <Icon className="size-6" strokeWidth={1} />
             <div className="flex-1 flex flex-col justify-center items-center">
                 <div className="font-semibold">{heading}</div>
-                <div>{subHeading}</div>
+                <div className="text-puregray-600 dark:text-puregray-400">{subHeading}</div>
             </div>
         </div>
     );

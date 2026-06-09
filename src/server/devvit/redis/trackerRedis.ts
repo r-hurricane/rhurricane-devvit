@@ -108,5 +108,6 @@ export const getUserPreferences = async (userId: string): Promise<UserPreference
 };
 
 export const saveUserPreferences = async (userId: string, preferences: UserPreferencesDto): Promise<string> => {
+    // TODO: Delete on user delete..........
     return await redis.set(RedisKeys.userPreference(userId), JSON.stringify(preferences));
 };

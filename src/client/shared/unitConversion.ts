@@ -5,21 +5,21 @@
  * License: BSD-3-Clause
  */
 
-import {DistancePreference, SpeedPreference, UserPreferencesDto} from "../dtos/redis/UserPreferencesDto.js";
+import {DistancePreference, SpeedPreference, UserPreferencesDto} from "../../shared/dtos/redis/UserPreferencesDto.js";
 
 export const speedString = (
     knots: number | string | null | undefined,
-    prefs: UserPreferencesDto | SpeedPreference,
+    prefs: UserPreferencesDto | SpeedPreference | undefined = 'kts',
     appendUnit: boolean = true,
     digits: number = 0
 ): string => {
-    const parts = convertSpeed(knots, prefs);
+    const parts = convertSpeed(knots, prefs ?? 'kts');
     return `${isNaN(parts[0]) ? ''.padStart(digits, '-') : Math.round(parts[0]).toFixed(0).padStart(digits, ' ')}${appendUnit ? parts[1] : ''}`;
 };
 
 export const convertSpeed = (
     knots: number | string | null | undefined,
-    prefs: UserPreferencesDto | SpeedPreference
+    prefs: UserPreferencesDto | SpeedPreference | undefined = 'kts'
 ): [number, string] => {
     const pref = typeof prefs == "string" ? prefs : prefs.speed;
     const speedParsed = knots === undefined || knots === null
@@ -35,7 +35,7 @@ export const convertSpeed = (
 
 export const distanceString = (
     nauticalMiles: number | string | null | undefined,
-    prefs: UserPreferencesDto | DistancePreference,
+    prefs: UserPreferencesDto | DistancePreference | undefined = 'nmi',
     appendUnit: boolean = true,
     digits: number = 0
 ): string => {
@@ -45,7 +45,7 @@ export const distanceString = (
 
 export const convertDistance = (
     nauticalMiles: number | string | null | undefined,
-    prefs: UserPreferencesDto | DistancePreference
+    prefs: UserPreferencesDto | DistancePreference | undefined = 'nmi'
 ): [number, string] => {
     const pref = typeof prefs == "string" ? prefs : prefs.distance;
     const distanceParsed = nauticalMiles === undefined || nauticalMiles === null
