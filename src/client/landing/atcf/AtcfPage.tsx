@@ -28,30 +28,33 @@ export const AtcfPage = ({
     }
     return (
         <ErrorBoundary fallback={<LoadingOrError error={true} />} onError={console.error}>
-            <div className="flex flex-col gap-1">
+            <div className="flex h-full min-h-0 flex-col gap-1">
                 <PageHeading
                     Icon={PiHurricaneThin}
                     heading="Automatic Tropical Cyclone Forecast (ATCF)"
                     subHeading={`Best Track - ${formatDate(atcfData.lastModified)}`}
                 />
-                {atcfData.data.length > 0
-                    ? (
-                        <>
-                            <div className="w-full px-2 grid grid-cols-5 gap-2 text-left gap-2 text-[10px] text-puregray-600 dark:text-puregray-400">
-                                <span className="col-span-2">Name</span>
-                                <span>Psur</span>
-                                <span>Wind/Gust</span>
-                                <span>Wind Radi</span>
-                            </div>
-                            {atcfData.data.map(s => <AtcfStormCard storm={s} />)}
-                        </>
-                    )
-                    : (
-                        <div className="h-20 flex justify-center items-center">
-                            No storms currently being tracked.
+
+                {atcfData.data.length > 0 ? (
+                    <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
+                        <div className="shrink-0 w-full px-2 grid grid-cols-5 gap-2 text-left text-[10px] text-puregray-600 dark:text-puregray-400">
+                            <span className="col-span-2">Name</span>
+                            <span>Psur</span>
+                            <span>Wind/Gust</span>
+                            <span>Wind Radi</span>
                         </div>
-                    )
-                }
+
+                        <div className="min-h-0 flex-1 flex flex-col gap-1">
+                            {atcfData.data.map(s => (
+                                <AtcfStormCard key={s.genNo} storm={s} />
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="h-20 shrink-0 flex justify-center items-center">
+                        No storms currently being tracked.
+                    </div>
+                )}
             </div>
         </ErrorBoundary>
     );

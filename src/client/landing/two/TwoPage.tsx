@@ -29,24 +29,26 @@ export const TwoPage = ({
     }
     return (
         <ErrorBoundary fallback={<LoadingOrError error={true} />} onError={console.error}>
-            <div className="flex flex-col gap-1">
+            <div className="flex h-full min-h-0 flex-col gap-1">
                 <PageHeading
                     Icon={LuRadar}
                     heading="Tropical Weather Outlook (TWO)"
                     subHeading={formatDate(twoData.data.basins.atlantic.issuedOn?.time)}
                 />
-                <h2 className="mt-2 font-semibold text-neutral-content-strong uppercase">Atlantic</h2>
-                {twoData.data.basins.atlantic.areas.length > 0
-                    ? twoData.data.basins.atlantic.areas.map(a =>
-                        <OutlookCard key={`alaoi${a.id}`} area={a} />)
-                    : (<NoFormation />)
-                }
-                <h2 className="mt-2 font-semibold text-neutral-content-strong uppercase">East/Central Pacific</h2>
-                {twoData.data.basins.pacific.areas.length > 0
-                    ? twoData.data.basins.pacific.areas.map(a =>
-                        <OutlookCard key={`paaoi${a.id}`} area={a} />)
-                    : (<NoFormation />)
-                }
+                <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
+                    <h2 className="mt-2 font-semibold text-neutral-content-strong uppercase">Atlantic</h2>
+                    {twoData.data.basins.atlantic.areas.length > 0
+                        ? twoData.data.basins.atlantic.areas.map((a, i) =>
+                            <OutlookCard key={`alaoi${i}`} area={a} />)
+                        : (<NoFormation />)
+                    }
+                    <h2 className="mt-2 font-semibold text-neutral-content-strong uppercase">East/Central Pacific</h2>
+                    {twoData.data.basins.pacific.areas.length > 0
+                        ? twoData.data.basins.pacific.areas.map((a, i) =>
+                            <OutlookCard key={`paaoi${i}`} area={a} />)
+                        : (<NoFormation />)
+                    }
+                </div>
             </div>
         </ErrorBoundary>
     );

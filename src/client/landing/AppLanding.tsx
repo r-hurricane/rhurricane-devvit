@@ -69,11 +69,11 @@ export const AppLanding = () => {
             for (let j = 0; j < 3; ++j) {
                 const storm = batch[j];
                 if (storm) {
-                    storms.push(<CurrentStorm storm={storm} />);
+                    storms.push(<CurrentStorm storm={storm} key={storm.binNumber} />);
                 }
             }
             currentStorms.push((
-                <div className="w-full flex gap-2">
+                <div className="w-full flex gap-2" key={currentStorms.length}>
                     {storms}
                 </div>
             ));
