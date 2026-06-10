@@ -63,13 +63,14 @@ export const TcpodStormList = ({
     return (
         <div>
             {Object.keys(storms).map(k => (
-                <div className="w-full p-2 flex items-center gap-2 rounded-md border-1 border-puregray-200 dark:border-puregray-700 bg-puregray-50 dark:bg-puregray-900">
+                <div key={k} className="w-full p-2 flex flex-col gap-2 rounded-md border-1 border-puregray-200 dark:border-puregray-700 bg-puregray-50 dark:bg-puregray-900">
                     <div>{k}</div>
                     <div>
                         {storms[k] && storms[k].map(s => {
                             const status = getStatus(s);
                             return (
                                 <div
+                                    key={s.id}
                                     className={`
                                         ${status === 'Complete' ? 'text-neutral-content-weak' : '' }
                                         ${status === 'In Storm' ? 'font-bood' : ''}

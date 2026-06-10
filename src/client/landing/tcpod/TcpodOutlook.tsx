@@ -30,10 +30,10 @@ export const TcpodOutlook = ({
 
     // Otherwise, print each outlook text
     return (
-        <div>
+        <div className="w-full p-2 flex flex-col gap-2 rounded-md border-1 border-puregray-200 dark:border-puregray-700 bg-puregray-50 dark:bg-puregray-900">
             <div>Tomorrow's Outlook</div>
             <div>
-                {outlook.map(o => (<div>* {o.text}</div>))}
+                {outlook.map((o, i)=> (<div key={i}>* {o.text}</div>))}
             </div>
         </div>
     );
